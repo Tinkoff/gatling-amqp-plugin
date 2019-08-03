@@ -33,7 +33,7 @@ class RequestReplyExample extends Simulation{
         .textMessage("Hello message - ${id}")
         .messageId("${id}")
         .priority(0)
-        .headers(Map("testheader" -> "testvalue"))
+        .property("testheader", "testvalue")
         .check(
           bodyString.exists,
           bodyString.is("Message processed")

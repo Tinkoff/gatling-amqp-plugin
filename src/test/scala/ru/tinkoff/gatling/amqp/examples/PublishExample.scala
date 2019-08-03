@@ -3,9 +3,9 @@ package ru.tinkoff.gatling.amqp.examples
 import io.gatling.core.Predef._
 import io.gatling.core.structure.ScenarioBuilder
 import ru.tinkoff.gatling.amqp.Predef._
+import ru.tinkoff.gatling.amqp.examples.Utils._
 import ru.tinkoff.gatling.amqp.protocol.AmqpProtocolBuilder
 
-import Utils._
 import scala.concurrent.duration._
 
 class PublishExample extends Simulation {
@@ -29,13 +29,11 @@ class PublishExample extends Simulation {
         .textMessage("Hello message - ${id}")
         .messageId("${id}")
         .priority(0)
-        .headers(Map("testheader" -> "testvalue"))
+        .property("testheader", "testvalue")
     )
 
   setUp(
-    scn.inject(
-      rampUsersPerSec(1) to 5 during (60 seconds),
-      constantUsersPerSec(5) during (5 minutes))
+    scn.inject(rampUsersPerSec(1) to 5 during (60 seconds), constantUsersPerSec(5) during (5 minutes))
   ).protocols(amqpConf)
     .maxDuration(10 minutes)
 
