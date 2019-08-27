@@ -4,9 +4,9 @@ import java.nio.charset.Charset
 
 import io.gatling.commons.validation._
 import io.gatling.core.check._
-import io.gatling.core.check.extractor.bytes.BodyBytesCheckType
-import io.gatling.core.check.extractor.string.BodyStringCheckType
-import io.gatling.core.check.extractor.xpath.XmlParsers
+import io.gatling.core.check.bytes.BodyBytesCheckType
+import io.gatling.core.check.string.BodyStringCheckType
+import io.gatling.core.check.xpath.XmlParsers
 import io.gatling.core.json.JsonParsers
 import ru.tinkoff.gatling.amqp.AmqpCheck
 import ru.tinkoff.gatling.amqp.checks.AmqpResponseCodeCheckBuilder.{AmqpMessageCheckType, ExtendedDefaultFindCheckBuilder, _}
@@ -41,7 +41,7 @@ trait AmqpCheckSupport {
     new AmqpJsonPathCheckMaterializer(jsonParsers)
 
   implicit def amqpBodyStringMaterializer: AmqpCheckMaterializer[BodyStringCheckType, String] =
-    new CheckMaterializer[BodyStringCheckType, AmqpCheck, AmqpProtocolMessage, String] {
+    new CheckMaterializer[BodyStringCheckType, AmqpCheck, AmqpProtocolMessage, String](identity) {
       override protected def preparer: Preparer[AmqpProtocolMessage, String] = replyMessage => {
         val bodyCharset = Try(Charset.forName(replyMessage.amqpProperties.getContentEncoding))
           .getOrElse(Charset.defaultCharset())
@@ -49,24 +49,19 @@ trait AmqpCheckSupport {
           new String(replyMessage.payload, bodyCharset).success
         } else "".success
       }
-
-      override protected def specializer: Specializer[AmqpCheck, AmqpProtocolMessage] = identity
     }
 
   implicit def amqpBodyByteMaterializer: AmqpCheckMaterializer[BodyBytesCheckType, Array[Byte]] =
-    new CheckMaterializer[BodyBytesCheckType, AmqpCheck, AmqpProtocolMessage, Array[Byte]] {
+    new CheckMaterializer[BodyBytesCheckType, AmqpCheck, AmqpProtocolMessage, Array[Byte]](identity) {
       override protected def preparer: Preparer[AmqpProtocolMessage, Array[Byte]] = replyMessage => {
         if (replyMessage.payload.length > 0) {
           replyMessage.payload.success
         } else Array.emptyByteArray.success
       }
-
-      override protected def specializer: Specializer[AmqpCheck, AmqpProtocolMessage] = identity
     }
 
   implicit val httpStatusCheckMaterializer: AmqpCheckMaterializer[AmqpMessageCheckType, AmqpProtocolMessage] =
-    new AmqpCheckMaterializer[AmqpMessageCheckType, AmqpProtocolMessage] {
-      override val specializer: Specializer[AmqpCheck, AmqpProtocolMessage]     = identity
+    new AmqpCheckMaterializer[AmqpMessageCheckType, AmqpProtocolMessage](identity) {
       override val preparer: Preparer[AmqpProtocolMessage, AmqpProtocolMessage] = _.success
     }
 

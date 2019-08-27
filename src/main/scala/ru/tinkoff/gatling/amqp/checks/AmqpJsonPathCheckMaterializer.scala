@@ -3,8 +3,8 @@ package ru.tinkoff.gatling.amqp.checks
 import java.io.ByteArrayInputStream
 import java.nio.charset.Charset
 
-import io.gatling.core.check.extractor.jsonpath.JsonPathCheckType
-import io.gatling.core.check.{CheckMaterializer, Preparer, Specializer}
+import io.gatling.core.check.jsonpath.JsonPathCheckType
+import io.gatling.core.check.{CheckMaterializer, Preparer}
 import io.gatling.core.json.JsonParsers
 import ru.tinkoff.gatling.amqp.AmqpCheck
 import ru.tinkoff.gatling.amqp.request.AmqpProtocolMessage
@@ -12,11 +12,9 @@ import ru.tinkoff.gatling.amqp.request.AmqpProtocolMessage
 import scala.util.Try
 
 class AmqpJsonPathCheckMaterializer(jsonParsers: JsonParsers)
-    extends CheckMaterializer[JsonPathCheckType, AmqpCheck, AmqpProtocolMessage, Any] {
+  extends CheckMaterializer[JsonPathCheckType, AmqpCheck, AmqpProtocolMessage, Any](identity) {
   override protected def preparer: Preparer[AmqpProtocolMessage, Any] =
     AmqpJsonPathCheckMaterializer.jsonPathPreparer(jsonParsers)
-
-  override protected def specializer: Specializer[AmqpCheck, AmqpProtocolMessage] = identity
 }
 
 object AmqpJsonPathCheckMaterializer {
@@ -27,8 +25,8 @@ object AmqpJsonPathCheckMaterializer {
       val bodyCharset = Try(Charset.forName(replyMessage.amqpProperties.getContentEncoding))
         .getOrElse(Charset.defaultCharset())
 
-      if (replyMessage.payload.length > CharsParsingThreshold || jsonParsers.preferJackson)
-        jsonParsers.safeParseJackson(new ByteArrayInputStream(replyMessage.payload), bodyCharset)
+      if (replyMessage.payload.length > CharsParsingThreshold)
+        jsonParsers.safeParse(new ByteArrayInputStream(replyMessage.payload), bodyCharset)
       else
         jsonParsers.safeParse(new String(replyMessage.payload, bodyCharset))
     }

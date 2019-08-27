@@ -1,5 +1,7 @@
 package ru.tinkoff.gatling.amqp.client
 
+import java.util.{HashMap => JHashMap}
+
 import akka.actor.{Props, Timers}
 import io.gatling.commons.stats.{KO, OK, Status}
 import io.gatling.commons.util.Clock
@@ -102,7 +104,7 @@ class AmqpMessageTrackerActor(statsEngine: StatsEngine, clock: Clock) extends Ba
       message: Option[String]
   ): Unit = {
     statsEngine.logResponse(session, requestName, sent, received, status, responseCode, message)
-    val s = session.logGroupRequest(sent, received, status)
+    val s = session.logGroupRequestTimings(sent, received)
     next ! s.copy(drift = clock.nowMillis - received + s.drift)
   }
 
@@ -118,7 +120,7 @@ class AmqpMessageTrackerActor(statsEngine: StatsEngine, clock: Clock) extends Ba
       next: Action,
       requestName: String
   ): Unit = {
-    val (newSession, error) = Check.check(message, session, checks)
+    val (newSession, error) = Check.check(message, session, checks, new JHashMap[Any, Any]())
     error match {
       case Some(Failure(errorMessage)) =>
         executeNext(newSession.markAsFailed, sent, received, KO, next, requestName, message.responseCode, Some(errorMessage))
