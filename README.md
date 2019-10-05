@@ -1,6 +1,6 @@
 # Introduction
 
-Plugin for support performance testing with AMQP in Gatling(3.x.x)
+Plugin for support performance testing with AMQP in Gatling(3.2.x)
 
 # Usage
 
