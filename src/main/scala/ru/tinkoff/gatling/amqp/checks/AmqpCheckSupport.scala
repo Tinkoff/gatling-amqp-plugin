@@ -1,13 +1,16 @@
 package ru.tinkoff.gatling.amqp.checks
 
 import java.nio.charset.Charset
+import java.util.{Map => JMap}
 
 import io.gatling.commons.validation._
+import io.gatling.core.Predef.Session
 import io.gatling.core.check._
 import io.gatling.core.check.bytes.BodyBytesCheckType
 import io.gatling.core.check.string.BodyStringCheckType
 import io.gatling.core.check.xpath.XmlParsers
 import io.gatling.core.json.JsonParsers
+import io.gatling.core.session.Expression
 import ru.tinkoff.gatling.amqp.AmqpCheck
 import ru.tinkoff.gatling.amqp.checks.AmqpResponseCodeCheckBuilder.{AmqpMessageCheckType, ExtendedDefaultFindCheckBuilder, _}
 import ru.tinkoff.gatling.amqp.request.AmqpProtocolMessage
@@ -60,9 +63,24 @@ trait AmqpCheckSupport {
       }
     }
 
-  implicit val httpStatusCheckMaterializer: AmqpCheckMaterializer[AmqpMessageCheckType, AmqpProtocolMessage] =
+  implicit val amqpStatusCheckMaterializer: AmqpCheckMaterializer[AmqpMessageCheckType, AmqpProtocolMessage] =
     new AmqpCheckMaterializer[AmqpMessageCheckType, AmqpProtocolMessage](identity) {
       override val preparer: Preparer[AmqpProtocolMessage, AmqpProtocolMessage] = _.success
     }
 
+  implicit val amqpUntypedConditionalCheckWrapper: UntypedConditionalCheckWrapper[AmqpCheck] =
+    (condition: Expression[Boolean], thenCheck: AmqpCheck) =>
+      new Check[AmqpProtocolMessage] {
+        private val typedCondition = (_: AmqpProtocolMessage, ses: Session) => condition(ses)
+
+        override def check(response: AmqpProtocolMessage,
+                           session: Session,
+                           preparedCache: JMap[Any, Any]): Validation[CheckResult] =
+          ConditionalCheck(typedCondition, thenCheck).check(response, session, preparedCache)
+    }
+
+  implicit val amqpTypedConditionalCheckWrapper: TypedConditionalCheckWrapper[AmqpProtocolMessage, AmqpCheck] =
+    (condition: (AmqpProtocolMessage, Session) => Validation[Boolean], thenCheck: AmqpCheck) =>
+      (response: AmqpProtocolMessage, session: Session, preparedCache: JMap[Any, Any]) =>
+        ConditionalCheck(condition, thenCheck).check(response, session, preparedCache)
 }
