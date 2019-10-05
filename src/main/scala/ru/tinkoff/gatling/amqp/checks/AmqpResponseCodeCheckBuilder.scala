@@ -1,8 +1,7 @@
 package ru.tinkoff.gatling.amqp.checks
 
 import io.gatling.commons.validation._
-import io.gatling.core.check._
-import io.gatling.core.check.extractor.{Extractor, SingleArity}
+import io.gatling.core.check.{Extractor, _}
 import io.gatling.core.session._
 import ru.tinkoff.gatling.amqp.AmqpCheck
 import ru.tinkoff.gatling.amqp.request.AmqpProtocolMessage
@@ -37,8 +36,9 @@ object AmqpResponseCodeCheckBuilder {
   }
 
   val ResponseCode: ExtendedDefaultFindCheckBuilder[AmqpMessageCheckType, AmqpProtocolMessage, String] = {
-    val rcExtractor = new Extractor[AmqpProtocolMessage, String] with SingleArity {
-      val name                                                             = "responseCode"
+    val rcExtractor = new Extractor[AmqpProtocolMessage, String] {
+      val name = "responseCode"
+      val arity = "find"
       def apply(prepared: AmqpProtocolMessage): Validation[Option[String]] = prepared.responseCode.success
     }.expressionSuccess
 

@@ -20,7 +20,7 @@ case class AmqpProtocolMessage(amqpProperties: AMQP.BasicProperties,
   }
 
   private def forceModify[T, V](obj: T, field: Field, fieldValue: V): T = {
-    if (field.isAccessible) {
+    if (field.canAccess(obj)) {
       field.set(obj, fieldValue)
     } else {
       field.setAccessible(true)
