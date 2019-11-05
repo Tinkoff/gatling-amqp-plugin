@@ -16,24 +16,33 @@ object AmqpProtocol {
     override def defaultProtocolValue(configuration: GatlingConfiguration): AmqpProtocol =
       throw new IllegalStateException("Can't provide a default value for AmqpProtocol")
 
-    private val trackerPoolRef = new AtomicReference[TrackerPool]()
+    private val trackerPoolRef    = new AtomicReference[TrackerPool]()
+    private val connectionPoolRef = new AtomicReference[AmqpConnectionPool]()
+
+    private def getOrCreateConnectionPool(protocol: AmqpProtocol) = {
+      if (connectionPoolRef.get() == null) {
+        connectionPoolRef.lazySet(
+          new AmqpConnectionPool(protocol.connectionFactory, protocol.consumersThreadCount)
+        )
+      }
+      connectionPoolRef.get()
+    }
+
+    private def getOrCreateTrackerPool(components: CoreComponents, pool: AmqpConnectionPool) = {
+      if (trackerPoolRef.get() == null) {
+        trackerPoolRef.lazySet(
+          new TrackerPool(pool, components.actorSystem, components.statsEngine, components.clock, components.configuration)
+        )
+      }
+      trackerPoolRef.get()
+    }
 
     override def newComponents(coreComponents: CoreComponents): AmqpProtocol => AmqpComponents =
       amqpProtocol => {
-        val pool = new AmqpConnectionPool(amqpProtocol.connectionFactory, amqpProtocol.consumersThreadCount)
+        val pool = getOrCreateConnectionPool(amqpProtocol)
         coreComponents.actorSystem.registerOnTermination(pool.close())
-
-        if (trackerPoolRef.get() == null) {
-          trackerPoolRef.lazySet(
-            new TrackerPool(pool,
-                            coreComponents.actorSystem,
-                            coreComponents.statsEngine,
-                            coreComponents.clock,
-                            coreComponents.configuration)
-          )
-        }
-
-        AmqpComponents(amqpProtocol, pool, trackerPoolRef.get())
+        val trackerPool = getOrCreateTrackerPool(coreComponents, pool)
+        AmqpComponents(amqpProtocol, pool, trackerPool)
       }
   }
 }
