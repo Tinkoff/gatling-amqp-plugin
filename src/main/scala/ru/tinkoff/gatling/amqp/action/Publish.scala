@@ -17,7 +17,7 @@ class Publish(attributes: AmqpAttributes,
               val clock: Clock,
               configuration: GatlingConfiguration,
               val next: Action,
-              throttler: Throttler,
+              throttler: Option[Throttler],
               throttled: Boolean)
     extends AmqpAction(attributes, components, throttler, throttled) {
   override val name: String = genName("amqpPublish")

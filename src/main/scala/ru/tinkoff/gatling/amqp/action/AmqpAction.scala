@@ -12,7 +12,7 @@ import ru.tinkoff.gatling.amqp.request.{AmqpAttributes, AmqpProtocolMessage}
 abstract class AmqpAction(
     attributes: AmqpAttributes,
     components: AmqpComponents,
-    throttler: Throttler,
+    throttler: Option[Throttler],
     throttled: Boolean
 ) extends RequestAction with AmqpLogging with NameGen {
   override val requestName: Expression[String] = attributes.requestName
@@ -29,7 +29,7 @@ abstract class AmqpAction(
     } yield {
 
       if (throttled) {
-        throttler.throttle(
+        throttler.get.throttle(
           session.scenario,
           () => publisher.publish(message, around, session)
         )
