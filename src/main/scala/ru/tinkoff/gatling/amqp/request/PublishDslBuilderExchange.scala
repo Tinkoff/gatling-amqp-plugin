@@ -7,6 +7,8 @@ case class PublishDslBuilderExchange(
     requestName: Expression[String],
     configuration: GatlingConfiguration
 ) {
+  def topicExchange(name: Expression[String], routingKey: Expression[String]):PublishDslBuilderMessage =
+    destination(AmqpTopicExchange(name, routingKey = routingKey))
 
   def directExchange(name: Expression[String], routingKey: Expression[String]): PublishDslBuilderMessage =
     destination(AmqpDirectExchange(name, routingKey))
