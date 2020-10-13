@@ -8,6 +8,9 @@ case class RequestReplyDslBuilderExchange(requestName: Expression[String], confi
   def directExchange(name: Expression[String], routingKey: Expression[String]): RequestReplyDslBuilderMessage =
     destination(AmqpDirectExchange(name, routingKey))
 
+  def topicExchange(name: Expression[String], routingKey: Expression[String]): RequestReplyDslBuilderMessage =
+    destination(AmqpTopicExchange(name, routingKey))
+
   def queueExchange(name: Expression[String]): RequestReplyDslBuilderMessage = destination(AmqpQueueExchange(name))
 
   def destination(dest: AmqpExchange) = RequestReplyDslBuilderMessage(
