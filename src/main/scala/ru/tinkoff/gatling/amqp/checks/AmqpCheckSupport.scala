@@ -38,7 +38,7 @@ trait AmqpCheckSupport {
     findCheckBuilder.find.exists
 
   implicit def amqpXPathMaterializer(implicit xmlParsers: XmlParsers): AmqpXPathCheckMaterializer =
-    new AmqpXPathCheckMaterializer(xmlParsers)
+    new AmqpXPathCheckMaterializer()
 
   implicit def amqpJsonPathMaterializer(implicit jsonParsers: JsonParsers): AmqpJsonPathCheckMaterializer =
     new AmqpJsonPathCheckMaterializer(jsonParsers)

@@ -18,7 +18,7 @@ class RequestReply(
     val statsEngine: StatsEngine,
     val clock: Clock,
     val next: Action,
-    throttler: Throttler,
+    throttler: Option[Throttler],
     throttled: Boolean
 ) extends AmqpAction(attributes, components, throttler, throttled) {
 

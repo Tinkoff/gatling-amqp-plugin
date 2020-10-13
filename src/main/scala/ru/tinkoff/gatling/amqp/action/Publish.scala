@@ -17,7 +17,7 @@ class Publish(attributes: AmqpAttributes,
               val clock: Clock,
               configuration: GatlingConfiguration,
               val next: Action,
-              throttler: Throttler,
+              throttler: Option[Throttler],
               throttled: Boolean)
     extends AmqpAction(attributes, components, throttler, throttled) {
   override val name: String = genName("amqpPublish")
@@ -33,7 +33,7 @@ class Publish(attributes: AmqpAttributes,
 
         val now = clock.nowMillis
 
-        statsEngine.logResponse(session, requestName, now, now, OK, None, None)
+        statsEngine.logResponse(session.scenario,session.groups, requestName, now, now, OK, None, None)
 
         next ! session
       },

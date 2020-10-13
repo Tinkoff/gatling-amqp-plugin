@@ -103,9 +103,9 @@ class AmqpMessageTrackerActor(statsEngine: StatsEngine, clock: Clock) extends Ba
       responseCode: Option[String],
       message: Option[String]
   ): Unit = {
-    statsEngine.logResponse(session, requestName, sent, received, status, responseCode, message)
+    statsEngine.logResponse(session.scenario,session.groups, requestName, sent, received, status, responseCode, message)
     val s = session.logGroupRequestTimings(sent, received)
-    next ! s.copy(drift = clock.nowMillis - received + s.drift)
+    next ! s.copy()
   }
 
   /**
