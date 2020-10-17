@@ -1,22 +1,26 @@
 package ru.tinkoff.gatling.amqp.checks
 
-import java.nio.charset.Charset
 import java.util.{Map => JMap}
 
+import com.fasterxml.jackson.databind.JsonNode
 import io.gatling.commons.validation._
 import io.gatling.core.Predef.Session
 import io.gatling.core.check._
 import io.gatling.core.check.bytes.BodyBytesCheckType
+import io.gatling.core.check.jmespath.JmesPathCheckType
+import io.gatling.core.check.jsonpath.JsonPathCheckType
 import io.gatling.core.check.string.BodyStringCheckType
-import io.gatling.core.check.xpath.XmlParsers
+import io.gatling.core.check.substring.SubstringCheckType
+import io.gatling.core.check.xpath.XPathCheckType
+import io.gatling.core.config.GatlingConfiguration
 import io.gatling.core.json.JsonParsers
 import io.gatling.core.session.Expression
+import net.sf.saxon.s9api.XdmNode
 import ru.tinkoff.gatling.amqp.AmqpCheck
 import ru.tinkoff.gatling.amqp.checks.AmqpResponseCodeCheckBuilder.{AmqpMessageCheckType, ExtendedDefaultFindCheckBuilder, _}
 import ru.tinkoff.gatling.amqp.request.AmqpProtocolMessage
 
 import scala.annotation.implicitNotFound
-import scala.util.Try
 
 trait AmqpCheckSupport {
   def messageCheck: AmqpMessageCheck.type                                                              = AmqpMessageCheck
@@ -37,36 +41,33 @@ trait AmqpCheckSupport {
       implicit materializer: CheckMaterializer[A, AmqpCheck, AmqpProtocolMessage, P]): AmqpCheck =
     findCheckBuilder.find.exists
 
-  implicit def amqpXPathMaterializer(implicit xmlParsers: XmlParsers): AmqpXPathCheckMaterializer =
-    new AmqpXPathCheckMaterializer()
+  implicit def amqpXPathMaterializer(
+      implicit configuration: GatlingConfiguration): AmqpCheckMaterializer[XPathCheckType, XdmNode] =
+    AmqpCheckMaterializer.xpath(configuration)
 
-  implicit def amqpJsonPathMaterializer(implicit jsonParsers: JsonParsers): AmqpJsonPathCheckMaterializer =
-    new AmqpJsonPathCheckMaterializer(jsonParsers)
+  implicit def amqpJsonPathMaterializer(
+      implicit jsonParsers: JsonParsers,
+      configuration: GatlingConfiguration): AmqpCheckMaterializer[JsonPathCheckType, JsonNode] =
+    AmqpCheckMaterializer.jsonPath(jsonParsers, configuration)
 
-  implicit def amqpBodyStringMaterializer: AmqpCheckMaterializer[BodyStringCheckType, String] =
-    new CheckMaterializer[BodyStringCheckType, AmqpCheck, AmqpProtocolMessage, String](identity) {
-      override protected def preparer: Preparer[AmqpProtocolMessage, String] = replyMessage => {
-        val bodyCharset = Try(Charset.forName(replyMessage.amqpProperties.getContentEncoding))
-          .getOrElse(Charset.defaultCharset())
-        if (replyMessage.payload.length > 0) {
-          new String(replyMessage.payload, bodyCharset).success
-        } else "".success
-      }
-    }
+  implicit def amqpJmesPathMaterializer(
+      implicit jsonParsers: JsonParsers,
+      configuration: GatlingConfiguration): AmqpCheckMaterializer[JmesPathCheckType, JsonNode] =
+    AmqpCheckMaterializer.jmesPath(jsonParsers, configuration)
+
+  implicit def amqpBodyStringMaterializer(
+      implicit configuration: GatlingConfiguration): AmqpCheckMaterializer[BodyStringCheckType, String] =
+    AmqpCheckMaterializer.bodyString(configuration)
+
+  implicit def amqpSubstringMaterializer(
+      implicit configuration: GatlingConfiguration): AmqpCheckMaterializer[SubstringCheckType, String] =
+    AmqpCheckMaterializer.substring(configuration)
 
   implicit def amqpBodyByteMaterializer: AmqpCheckMaterializer[BodyBytesCheckType, Array[Byte]] =
-    new CheckMaterializer[BodyBytesCheckType, AmqpCheck, AmqpProtocolMessage, Array[Byte]](identity) {
-      override protected def preparer: Preparer[AmqpProtocolMessage, Array[Byte]] = replyMessage => {
-        if (replyMessage.payload.length > 0) {
-          replyMessage.payload.success
-        } else Array.emptyByteArray.success
-      }
-    }
+    AmqpCheckMaterializer.bodyBytes
 
   implicit val amqpStatusCheckMaterializer: AmqpCheckMaterializer[AmqpMessageCheckType, AmqpProtocolMessage] =
-    new AmqpCheckMaterializer[AmqpMessageCheckType, AmqpProtocolMessage](identity) {
-      override val preparer: Preparer[AmqpProtocolMessage, AmqpProtocolMessage] = _.success
-    }
+    new AmqpCheckMaterializer[AmqpMessageCheckType, AmqpProtocolMessage](_.success)
 
   implicit val amqpUntypedConditionalCheckWrapper: UntypedConditionalCheckWrapper[AmqpCheck] =
     (condition: Expression[Boolean], thenCheck: AmqpCheck) =>

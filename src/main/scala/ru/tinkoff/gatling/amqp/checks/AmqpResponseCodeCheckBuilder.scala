@@ -25,14 +25,12 @@ object AmqpResponseCodeCheckBuilder {
     }
   }
 
-  type CBWithSaveAs[T, P, X] = CheckBuilder[T, P, X]
-
   class ExtendedDefaultFindCheckBuilder[T, P, X](ext: Expression[Extractor[P, X]], displayActualValue: Boolean)
       extends DefaultFindCheckBuilder[T, P, X](ext, displayActualValue) {
-    def notIn(expected: Expression[Seq[X]]): CBWithSaveAs[T, P, X] =
+    def notIn(expected: Expression[Seq[X]]): CheckBuilder[T, P, X] =
       new DefaultCheckBuilder[T, P, X](this.ext, expected.map(new NotInMatcher(_)), displayActualValue, None, None)
 
-    def notIn(expected: X*): CBWithSaveAs[T, P, X] = notIn(expected.toSeq.expressionSuccess)
+    def notIn(expected: X*): CheckBuilder[T, P, X] = notIn(expected.toSeq.expressionSuccess)
   }
 
   val ResponseCode: ExtendedDefaultFindCheckBuilder[AmqpMessageCheckType, AmqpProtocolMessage, String] = {

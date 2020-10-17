@@ -1,7 +1,5 @@
 package ru.tinkoff.gatling.amqp.client
 
-import java.util.{HashMap => JHashMap}
-
 import akka.actor.{Props, Timers}
 import io.gatling.commons.stats.{KO, OK, Status}
 import io.gatling.commons.util.Clock
@@ -21,7 +19,7 @@ import scala.concurrent.duration._
 
 object AmqpMessageTrackerActor {
 
-  def props(statsEngine: StatsEngine, clock: Clock, configuration: GatlingConfiguration) =
+  def props(statsEngine: StatsEngine, clock: Clock, configuration: GatlingConfiguration): Props =
     Props(new AmqpMessageTrackerActor(statsEngine, clock))
 
   case class MessagePublished(
@@ -51,7 +49,7 @@ class AmqpMessageTrackerActor(statsEngine: StatsEngine, clock: Clock) extends Ba
   def triggerPeriodicTimeoutScan(): Unit =
     if (!periodicTimeoutScanTriggered) {
       periodicTimeoutScanTriggered = true
-      timers.startPeriodicTimer("timeoutTimer", TimeoutScan, 1000 millis)
+      timers.startTimerWithFixedDelay("timeoutTimer", TimeoutScan, 1000 millis)
     }
 
   override def receive: Receive = {
@@ -103,9 +101,8 @@ class AmqpMessageTrackerActor(statsEngine: StatsEngine, clock: Clock) extends Ba
       responseCode: Option[String],
       message: Option[String]
   ): Unit = {
-    statsEngine.logResponse(session.scenario,session.groups, requestName, sent, received, status, responseCode, message)
-    val s = session.logGroupRequestTimings(sent, received)
-    next ! s.copy()
+    statsEngine.logResponse(session.scenario, session.groups, requestName, sent, received, status, responseCode, message)
+    next ! session.logGroupRequestTimings(sent, received)
   }
 
   /**
@@ -120,7 +117,7 @@ class AmqpMessageTrackerActor(statsEngine: StatsEngine, clock: Clock) extends Ba
       next: Action,
       requestName: String
   ): Unit = {
-    val (newSession, error) = Check.check(message, session, checks, new JHashMap[Any, Any]())
+    val (newSession, error) = Check.check(message, session, checks)
     error match {
       case Some(Failure(errorMessage)) =>
         executeNext(newSession.markAsFailed, sent, received, KO, next, requestName, message.responseCode, Some(errorMessage))
