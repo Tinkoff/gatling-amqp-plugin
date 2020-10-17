@@ -8,8 +8,12 @@ package object request {
 
   sealed trait AmqpExchange
 
+  case class AmqpTopicExchange(name: Expression[String], routingKey: Expression[String], durable: Boolean = false)
+    extends AmqpExchange
+
   case class AmqpDirectExchange(name: Expression[String], routingKey: Expression[String], durable: Boolean = false)
       extends AmqpExchange
+
   case class AmqpQueueExchange(name: Expression[String], durable: Boolean = false) extends AmqpExchange
 
   sealed trait AmqpMessage {
