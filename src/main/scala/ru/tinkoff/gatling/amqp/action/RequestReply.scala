@@ -18,9 +18,8 @@ class RequestReply(
     val statsEngine: StatsEngine,
     val clock: Clock,
     val next: Action,
-    throttler: Option[Throttler],
-    throttled: Boolean
-) extends AmqpAction(attributes, components, throttler, throttled) {
+    throttler: Option[Throttler]
+) extends AmqpAction(attributes, components, throttler) {
 
   private val replyTimeout = components.protocol.replyTimeout.getOrElse(0L)
 

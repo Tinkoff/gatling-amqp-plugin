@@ -23,10 +23,8 @@ case class PublishBuilder(attributes: AmqpAttributes, configuration: GatlingConf
       amqpComponents,
       statsEngine,
       coreComponents.clock,
-      configuration,
       next,
-      coreComponents.throttler,
-      ctx.throttled
+      coreComponents.throttler
     )
   }
 }

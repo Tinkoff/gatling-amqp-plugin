@@ -30,8 +30,7 @@ case class RequestReplyBuilder(attributes: AmqpAttributes,
       statsEngine,
       coreComponents.clock,
       next,
-      coreComponents.throttler,
-      ctx.throttled
+      coreComponents.throttler
     )
 
   }

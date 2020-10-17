@@ -12,32 +12,24 @@ import ru.tinkoff.gatling.amqp.request.{AmqpAttributes, AmqpProtocolMessage}
 abstract class AmqpAction(
     attributes: AmqpAttributes,
     components: AmqpComponents,
-    throttler: Option[Throttler],
-    throttled: Boolean
+    throttler: Option[Throttler]
 ) extends RequestAction with AmqpLogging with NameGen {
   override val requestName: Expression[String] = attributes.requestName
 
   private val publisher = new AmqpPublisher(attributes.destination, components)
 
-  override def sendRequest(requestName: String, session: Session): Validation[Unit] = {
+  override def sendRequest(requestName: String, session: Session): Validation[Unit] =
     for {
       props <- resolveProperties(attributes.messageProperties, session)
       message <- attributes.message
                   .amqpProtocolMessage(session)
                   .map(_.mergeProperties(props + ("deliveryMode" -> components.protocol.deliveryMode)))
       around <- aroundPublish(requestName, session, message)
-    } yield {
-
-      if (throttled) {
-        throttler.get.throttle(
-          session.scenario,
-          () => publisher.publish(message, around, session)
+    } yield
+      throttler
+        .fold(publisher.publish(message, around, session))(
+          _.throttle(session.scenario, () => publisher.publish(message, around, session))
         )
-      } else publisher.publish(message, around, session)
-
-    }
-
-  }
 
   private def resolveProperties(
       properties: Map[Expression[String], Expression[Any]],
