@@ -52,6 +52,7 @@ class RequestReply(
     dest match {
       case AmqpDirectExchange(name, _, _) => name(session)
       case AmqpQueueExchange(name, _)     => name(session)
+      case AmqpTopicExchange(name, _, _) => name(session)
     }
 
 }
