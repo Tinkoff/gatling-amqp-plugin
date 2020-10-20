@@ -13,11 +13,11 @@ class PublishExample extends Simulation {
   val amqpConf: AmqpProtocolBuilder = amqp
     .connectionFactory(
       rabbitmq
-        .host("test_mq")
+        .host("localhost")
         .port(5672)
-        .username("testUser")
-        .password("testPass")
-        .vhost("/test")
+        .username("guest")
+        .password("guest")
+        .vhost("/")
     )
     .usePersistentDeliveryMode
 
@@ -25,11 +25,10 @@ class PublishExample extends Simulation {
     .feed(idFeeder)
     .exec(
       amqp("publish to exchange").publish
-        .directExchange("test_queue", "test_key")
+        .queueExchange("test_q_in")
         .textMessage("Hello message - ${id}")
         .messageId("${id}")
         .priority(0)
-        .property("testheader", "testvalue")
     )
 
   setUp(

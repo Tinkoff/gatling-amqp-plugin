@@ -13,11 +13,11 @@ class RequestReplyExample extends Simulation{
   val amqpConf: AmqpProtocolBuilder = amqp
     .connectionFactory(
       rabbitmq
-        .host("test_mq")
+        .host("localhost")
         .port(5672)
-        .username("testUser")
-        .password("testPass")
-        .vhost("/test")
+        .username("guest")
+        .password("guest")
+        .vhost("/")
     )
     .replyTimeout(60000)
     .consumerThreadsCount(8)
@@ -28,12 +28,13 @@ class RequestReplyExample extends Simulation{
     .feed(idFeeder)
     .exec(
       amqp("Request Reply exchange test").requestReply
-        .directExchange("test_queue_in", "test_key")
+        .topicExchange("test_queue_in", "we")
         .replyExchange("test_queue_out")
-        .textMessage("Hello message - ${id}")
+        .textMessage("""{"msg": "Hello message - ${id}"}""")
         .messageId("${id}")
         .priority(0)
-        .property("testheader", "testvalue")
+        .contentType("application/json")
+        .headers("test"-> "performance", "extra-test" -> "34-${id}")
         .check(
           bodyString.exists,
           bodyString.is("Message processed")
@@ -43,7 +44,7 @@ class RequestReplyExample extends Simulation{
   setUp(
     scn.inject(
       rampUsersPerSec(1) to 5 during (60 seconds),
-      constantUsersPerSec(5) during (5 minutes))
+      constantUsersPerSec(5) during (2 minutes))
   ).protocols(amqpConf)
     .maxDuration(10 minutes)
 }

@@ -1,5 +1,7 @@
 package ru.tinkoff.gatling.amqp.request
 
+import java.nio.charset.Charset
+
 import io.gatling.core.config.GatlingConfiguration
 import io.gatling.core.session.Expression
 import ru.tinkoff.gatling.amqp.action.RequestReplyBuilder
@@ -20,7 +22,7 @@ case class RequestReplyDslBuilderMessage(
   private def replyDestination(destination: AmqpExchange)                    = this.copy(replyDest = destination)
   def noReplyTo: RequestReplyDslBuilderMessage                               = this.copy(setReplyTo = false)
 
-  def textMessage(text: Expression[String]): RequestReplyDslBuilder        = message(TextAmqpMessage(text))
+  def textMessage(text: Expression[String], charset: Charset = configuration.core.charset): RequestReplyDslBuilder        = message(TextAmqpMessage(text, charset))
   def bytesMessage(bytes: Expression[Array[Byte]]): RequestReplyDslBuilder = message(BytesAmqpMessage(bytes))
 
   private def message(mess: AmqpMessage) =
