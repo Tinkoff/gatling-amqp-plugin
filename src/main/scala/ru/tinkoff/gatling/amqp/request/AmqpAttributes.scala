@@ -8,6 +8,6 @@ case class AmqpAttributes(
     destination: AmqpExchange,
     selector: Option[String],
     message: AmqpMessage,
-    messageProperties: Map[Expression[String], Expression[Any]] = Map.empty,
+    messageProperties: AmqpMessageProperties = AmqpMessageProperties(),
     checks: List[AmqpCheck] = Nil
 )

@@ -1,23 +1,53 @@
 package ru.tinkoff.gatling.amqp.request
 
+import java.util.Date
+
 import com.softwaremill.quicklens._
 import io.gatling.core.action.builder.ActionBuilder
-import io.gatling.core.session.{Expression, _}
-
-import scala.collection.JavaConverters._
+import io.gatling.core.session.Expression
 
 case class PublishDslBuilder(attributes: AmqpAttributes, factory: AmqpAttributes => ActionBuilder) {
-  def property(key: Expression[String], value: Expression[Any]): PublishDslBuilder =
-    this.modify(_.attributes.messageProperties).using(_ + (key -> value))
+  def messageId(value: Expression[String]): PublishDslBuilder =
+    this.modify(_.attributes.messageProperties.messageId).setTo(Some(value))
 
-  def messageId(id: Expression[String]): PublishDslBuilder =
-    this.modify(_.attributes.messageProperties).using(_ + ("messageId".expressionSuccess -> id))
+  def priority(value: Expression[Int]): PublishDslBuilder =
+    this.modify(_.attributes.messageProperties.priority).setTo(Some(value))
 
-  def priority(msgPriority: Expression[Int]): PublishDslBuilder =
-    this.modify(_.attributes.messageProperties).using(_ + ("priority".expressionSuccess -> msgPriority))
+  def contentType(value: Expression[String]): PublishDslBuilder =
+    this.modify(_.attributes.messageProperties.contentType).setTo(Some(value))
 
-  def headers(hdrs: Expression[Map[String, String]]): PublishDslBuilder =
-    this.modify(_.attributes.messageProperties).using(_ + ("headers".expressionSuccess -> hdrs.map(_.asJava)))
+  def contentEncoding(value: Expression[String]): PublishDslBuilder =
+    this.modify(_.attributes.messageProperties.contentEncoding).setTo(Some(value))
+
+  def correlationId(value: Expression[String]): PublishDslBuilder =
+    this.modify(_.attributes.messageProperties.correlationId).setTo(Some(value))
+
+  def replyTo(value: Expression[String]): PublishDslBuilder =
+    this.modify(_.attributes.messageProperties.replyTo).setTo(Some(value))
+
+  def expiration(value: Expression[String]): PublishDslBuilder =
+    this.modify(_.attributes.messageProperties.expiration).setTo(Some(value))
+
+  def timestamp(value: Expression[Date]): PublishDslBuilder =
+    this.modify(_.attributes.messageProperties.timestamp).setTo(Some(value))
+
+  def amqpType(value: Expression[String]): PublishDslBuilder =
+    this.modify(_.attributes.messageProperties.`type`).setTo(Some(value))
+
+  def userId(value: Expression[String]): PublishDslBuilder =
+    this.modify(_.attributes.messageProperties.userId).setTo(Some(value))
+
+  def appId(value: Expression[String]): PublishDslBuilder =
+    this.modify(_.attributes.messageProperties.appId).setTo(Some(value))
+
+  def clusterId(value: Expression[String]): PublishDslBuilder =
+    this.modify(_.attributes.messageProperties.clusterId).setTo(Some(value))
+
+  def header(key: String, value: Expression[String]): PublishDslBuilder =
+    this.modify(_.attributes.messageProperties.headers).using(_ + (key -> value))
+
+  def headers(hs: (String, Expression[String])*): PublishDslBuilder =
+    hs.foldLeft(this) { case (rb, (k, v)) => rb.header(k, v) }
 
   def build(): ActionBuilder = factory(attributes)
 }

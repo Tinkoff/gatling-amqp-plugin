@@ -7,7 +7,7 @@ import io.gatling.core.session.{Expression, Session}
 import io.gatling.core.util.NameGen
 import ru.tinkoff.gatling.amqp.client.AmqpPublisher
 import ru.tinkoff.gatling.amqp.protocol.AmqpComponents
-import ru.tinkoff.gatling.amqp.request.{AmqpAttributes, AmqpProtocolMessage}
+import ru.tinkoff.gatling.amqp.request.{AmqpAttributes, AmqpMessageProperties, AmqpProtocolMessage}
 
 abstract class AmqpAction(
     attributes: AmqpAttributes,
@@ -20,29 +20,17 @@ abstract class AmqpAction(
 
   override def sendRequest(requestName: String, session: Session): Validation[Unit] =
     for {
-      props <- resolveProperties(attributes.messageProperties, session)
+      props             <- AmqpMessageProperties.toBasicProperties(attributes.messageProperties, session)
+      propsWithDelivery <- props.builder().deliveryMode(components.protocol.deliveryMode).build().success
       message <- attributes.message
                   .amqpProtocolMessage(session)
-                  .map(_.mergeProperties(props + ("deliveryMode" -> components.protocol.deliveryMode)))
+                  .map(_.copy(amqpProperties = propsWithDelivery))
       around <- aroundPublish(requestName, session, message)
     } yield
       throttler
         .fold(publisher.publish(message, around, session))(
           _.throttle(session.scenario, () => publisher.publish(message, around, session))
         )
-
-  private def resolveProperties(
-      properties: Map[Expression[String], Expression[Any]],
-      session: Session
-  ): Validation[Map[String, Any]] =
-    properties.foldLeft(Map.empty[String, Any].success) {
-      case (resolvedProperties, (key, value)) =>
-        for {
-          key                <- key(session)
-          value              <- value(session)
-          resolvedProperties <- resolvedProperties
-        } yield resolvedProperties + (key -> value)
-    }
 
   protected def aroundPublish(requestName: String, session: Session, message: AmqpProtocolMessage): Validation[Around]
 
