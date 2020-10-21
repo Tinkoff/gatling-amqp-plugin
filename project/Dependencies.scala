@@ -6,7 +6,7 @@ object Dependencies {
     "io.gatling" % "gatling-test-framework"
   ).map(_ % "3.4.0" % Compile)
   
-  lazy val rabbitmq = "com.rabbitmq" % "amqp-client" % "5.7.1"
-  lazy val commonsPool = "org.apache.commons" % "commons-pool2" % "2.6.2"
+  lazy val rabbitmq = "com.rabbitmq" % "amqp-client" % "5.9.0"
+  lazy val commonsPool = "org.apache.commons" % "commons-pool2" % "2.9.0"
   
 }
