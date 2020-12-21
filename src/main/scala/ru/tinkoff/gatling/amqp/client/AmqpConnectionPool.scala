@@ -14,14 +14,15 @@ class AmqpConnectionPool(factory: ConnectionFactory, consumerThreadsCount: Int) 
   poolConfig.setMaxTotal(16)
 
   private val channelPool: ObjectPool[Channel] = new GenericObjectPool[Channel](new AmqpChannelFactory(connection))
-  //new AmqpChannelPool(connection)
 
   def createConsumerChannel: Channel = connection.createChannel()
 
   def close(): Unit = {
     if (connection != null) {
       channelPool.close()
-      connection.close()
+      if (connection.isOpen) {
+        connection.close()
+      }
     }
   }
 
