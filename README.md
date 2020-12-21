@@ -13,4 +13,7 @@ libraryDependencies += "ru.tinkoff" %% "gatling-amqp-plugin" % <version> % Test
 ``` 
 
 ## Example Scenarios
-Example scenarios for publishing and request-reply exchanges you could be found [here](https://github.com/TinkoffCreditSystems/gatling-amqp-plugin/tree/master/src/test/scala/ru/tinkoff/gatling/amqp/examples/)
+
+* Example scenario for [publishing](https://github.com/TinkoffCreditSystems/gatling-amqp-plugin/blob/master/src/test/scala/ru/tinkoff/gatling/amqp/examples/PublishExample.scala)
+* Example scenario for [Publish And Reply](https://github.com/TinkoffCreditSystems/gatling-amqp-plugin/blob/master/src/test/scala/ru/tinkoff/gatling/amqp/examples/RequestReplyExample.scala)
+* Example scenario for [Publish and Reply on different message-brokers](https://github.com/TinkoffCreditSystems/gatling-amqp-plugin/blob/master/src/test/scala/ru/tinkoff/gatling/amqp/examples/RequestReplyTwoBrokerExample.scala)

@@ -17,15 +17,25 @@ object AmqpProtocol {
       throw new IllegalStateException("Can't provide a default value for AmqpProtocol")
 
     private val trackerPoolRef    = new AtomicReference[TrackerPool]()
-    private val connectionPoolRef = new AtomicReference[AmqpConnectionPool]()
+    private val connectionPublishPoolRef = new AtomicReference[AmqpConnectionPool]()
+    private val connectionReplyPoolRef = new AtomicReference[AmqpConnectionPool]()
 
-    private def getOrCreateConnectionPool(protocol: AmqpProtocol) = {
-      if (connectionPoolRef.get() == null) {
-        connectionPoolRef.lazySet(
+    private def getOrCreateConnectionPublishPool(protocol: AmqpProtocol) = {
+      if (connectionPublishPoolRef.get() == null) {
+        connectionPublishPoolRef.lazySet(
           new AmqpConnectionPool(protocol.connectionFactory, protocol.consumersThreadCount)
         )
       }
-      connectionPoolRef.get()
+      connectionPublishPoolRef.get()
+    }
+
+    private def getOrCreateConnectionReplyPool(protocol: AmqpProtocol) = {
+      if (connectionReplyPoolRef.get() == null) {
+        connectionReplyPoolRef.lazySet(
+          new AmqpConnectionPool(protocol.replyConnectionFactory, protocol.consumersThreadCount)
+        )
+      }
+      connectionReplyPoolRef.get()
     }
 
     private def getOrCreateTrackerPool(components: CoreComponents, pool: AmqpConnectionPool) = {
@@ -39,16 +49,21 @@ object AmqpProtocol {
 
     override def newComponents(coreComponents: CoreComponents): AmqpProtocol => AmqpComponents =
       amqpProtocol => {
-        val pool = getOrCreateConnectionPool(amqpProtocol)
-        coreComponents.actorSystem.registerOnTermination(pool.close())
-        val trackerPool = getOrCreateTrackerPool(coreComponents, pool)
-        AmqpComponents(amqpProtocol, pool, trackerPool)
+        val requestPool = getOrCreateConnectionPublishPool(amqpProtocol)
+        coreComponents.actorSystem.registerOnTermination(requestPool.close())
+        val replyPool = getOrCreateConnectionReplyPool(amqpProtocol)
+        coreComponents.actorSystem.registerOnTermination(replyPool.close())
+
+        val trackerPool = getOrCreateTrackerPool(coreComponents, replyPool)
+
+        AmqpComponents(amqpProtocol, requestPool, replyPool, trackerPool)
       }
   }
 }
 
 case class AmqpProtocol(
     connectionFactory: ConnectionFactory,
+    replyConnectionFactory: ConnectionFactory,
     deliveryMode: Int,
     replyTimeout: Option[Long],
     consumersThreadCount: Int,

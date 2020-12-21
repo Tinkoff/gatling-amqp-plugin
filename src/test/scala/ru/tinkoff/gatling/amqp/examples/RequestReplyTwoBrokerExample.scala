@@ -9,11 +9,18 @@ import ru.tinkoff.gatling.amqp.protocol.AmqpProtocolBuilder
 import scala.concurrent.duration._
 
 class RequestReplyTwoBrokerExample extends Simulation{
+
   val amqpConf: AmqpProtocolBuilder = amqp
     .connectionFactory(
       rabbitmq
         .host("localhost")
         .port(5672)
+        .username("guest")
+        .password("guest")
+        .vhost("/"),
+      rabbitmq
+        .host("localhost")
+        .port(5673)
         .username("guest")
         .password("guest")
         .vhost("/")
@@ -28,7 +35,7 @@ class RequestReplyTwoBrokerExample extends Simulation{
     .exec(
       amqp("Request Reply exchange test").requestReply
         .queueExchange("readQueue")
-        .replyExchange("readQueue")
+        .replyExchange("writeQueue")
         .textMessage("""{"msg": "Hello message - ${id}"}""")
         .messageId("${id}")
         .priority(0)
