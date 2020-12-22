@@ -8,6 +8,12 @@ import ru.tinkoff.gatling.amqp.protocol.AmqpProtocolBuilder
 
 import scala.concurrent.duration._
 
+/**
+  * Execute this test.
+  * - start docker-compose for the ´docker-compose.yaml`
+  * - run `RabbitMQConsumer' - this class implements a consumer for queue readQueue which reads from it and writes to _writeQueue_
+  * - run RequestReplyGatlingRunner from IDE - it will write to readQueue and read messages from writeQueue
+  */
 class RequestReplyTwoBrokerExample extends Simulation{
 
   val amqpConf: AmqpProtocolBuilder = amqp
@@ -30,7 +36,7 @@ class RequestReplyTwoBrokerExample extends Simulation{
     .matchByMessageId
     .usePersistentDeliveryMode
 
-  val scn: ScenarioBuilder = scenario("AMQP test")
+  val scn: ScenarioBuilder = scenario("Request Reply AMQP test")
     .feed(idFeeder)
     .exec(
       amqp("Request Reply exchange test").requestReply

@@ -2,18 +2,20 @@ package ru.tinkoff.gatling.amqp.examples
 
 import com.rabbitmq.client._
 
+import java.nio.charset.StandardCharsets
+
 // Testclient which consumes messages and writes something in other queue
 
-object RabbitMQConssumer {
+object RabbitMQConsumer {
 
   val deliverCallback: DeliverCallback = {
     new DeliverCallback {
       override def handle(consumerTag: String, message: Delivery): Unit = {
-        print("message")
+        println("Received a message")
         val connection = getConnection(writePort)
         val channel = connection.createChannel()
         channel.queueDeclare(writeQueue, true, false, false, null)
-        channel.basicPublish("", writeQueue, null, message.getBody)
+        channel.basicPublish("", writeQueue, message.getProperties, "Message processed".getBytes(StandardCharsets.UTF_8))
       }
     }
   }
@@ -27,7 +29,7 @@ object RabbitMQConssumer {
     val connection = getConnection(readPort)
     val channel = connection.createChannel()
     channel.queueDeclare(readQueue, true, false, false, null)
-    channel.basicConsume(readQueue, deliverCallback, cancelCallback)
+    channel.basicConsume(readQueue,true, deliverCallback, cancelCallback)
 
   }
 
@@ -36,8 +38,7 @@ object RabbitMQConssumer {
     readAndWrite()
     Thread.sleep(1000000)
     tearDown()
-    System.exit(1
-    )
+    System.exit(1)
   }
 
   private val readQueue = "readQueue"

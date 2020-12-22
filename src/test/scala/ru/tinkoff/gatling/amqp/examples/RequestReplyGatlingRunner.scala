@@ -18,12 +18,10 @@ object RequestReplyTwoBrokerRunnerRunner {
     val simClass = classOf[RequestReplyTwoBrokerExample].getName
 
     val props = new GatlingPropertiesBuilder
-    //props.sourcesDirectory("./src/main/scala")
     props.binariesDirectory("./target/scala-2.11/classes")
     props.simulationClass(simClass)
 
-
     Gatling.fromMap(props.build)
-
+    System.exit(0)
   }
 }
