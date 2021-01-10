@@ -25,6 +25,7 @@ abstract class AmqpAction(
       message <- attributes.message
                   .amqpProtocolMessage(session)
                   .map(_.copy(amqpProperties = propsWithDelivery))
+                  .map(components.protocol.messageMatcher.prepareRequest)
       around <- aroundPublish(requestName, session, message)
     } yield
       throttler
