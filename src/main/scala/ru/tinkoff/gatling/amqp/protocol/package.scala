@@ -7,28 +7,24 @@ import ru.tinkoff.gatling.amqp.request.AmqpProtocolMessage
 
 package object protocol {
   trait AmqpMessageMatcher {
-    def prepareRequest(msg: AmqpProtocolMessage): Unit
+    def prepareRequest(msg: AmqpProtocolMessage): AmqpProtocolMessage = msg
     def requestMatchId(msg: AmqpProtocolMessage): String
     def responseMatchId(msg: AmqpProtocolMessage): String
   }
 
   object MessageIdMessageMatcher extends AmqpMessageMatcher {
-    override def prepareRequest(msg: AmqpProtocolMessage): Unit    = {}
     override def requestMatchId(msg: AmqpProtocolMessage): String  = msg.messageId
     override def responseMatchId(msg: AmqpProtocolMessage): String = msg.messageId
   }
 
   object CorrelationIdMessageMatcher extends AmqpMessageMatcher {
-    override def prepareRequest(msg: AmqpProtocolMessage): Unit    = msg.correlationId(FastUUID.toString(UUID.randomUUID))
+    override def prepareRequest(msg: AmqpProtocolMessage): AmqpProtocolMessage    = msg.correlationId(FastUUID.toString(UUID.randomUUID))
     override def requestMatchId(msg: AmqpProtocolMessage): String  = msg.correlationId
     override def responseMatchId(msg: AmqpProtocolMessage): String = msg.correlationId
   }
 
   case class AmqpProtocolMessageMatcher(extractId: AmqpProtocolMessage => String) extends AmqpMessageMatcher {
-    override def prepareRequest(msg: AmqpProtocolMessage): Unit = {}
-
     override def requestMatchId(msg: AmqpProtocolMessage): String = extractId(msg)
-
     override def responseMatchId(msg: AmqpProtocolMessage): String = extractId(msg)
   }
 
