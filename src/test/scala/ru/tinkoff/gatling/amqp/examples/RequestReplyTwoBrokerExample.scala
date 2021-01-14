@@ -10,11 +10,13 @@ import scala.concurrent.duration._
 
 /**
   * Execute this test.
-  * - start docker-compose for the ´docker-compose.yaml`
-  * - run `RabbitMQConsumer' - this class implements a consumer for queue readQueue which reads from it and writes to _writeQueue_
+  * - start docker-compose for the `docker-compose.yaml` - docker-compose -f docker-compose.yml up
+  * -- open http://localhost:15672 (gatling publishes messages here), user: guest, password: guest
+  * -- open http://localhost:15673 (consumer writes messages here), user: guest, password: guest
+  * - run `SimpleRabbitMQClient` - this class implements a consumer for queue readQueue which reads from it and writes to _writeQueue_
   * - run RequestReplyGatlingRunner from IDE - it will write to readQueue and read messages from writeQueue
   */
-class RequestReplyTwoBrokerExample extends Simulation{
+class RequestReplyTwoBrokerExample extends Simulation {
 
   val amqpConf: AmqpProtocolBuilder = amqp
     .connectionFactory(
@@ -46,7 +48,7 @@ class RequestReplyTwoBrokerExample extends Simulation{
         .messageId("${id}")
         .priority(0)
         .contentType("application/json")
-        .headers("test"-> "performance", "extra-test" -> "34-${id}")
+        .headers("test" -> "performance", "extra-test" -> "34-${id}")
         .check(
           bodyString.exists,
           bodyString.is("Message processed")

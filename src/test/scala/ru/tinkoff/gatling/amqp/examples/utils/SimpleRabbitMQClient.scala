@@ -1,35 +1,32 @@
-package ru.tinkoff.gatling.amqp.examples
+package ru.tinkoff.gatling.amqp.examples.utils
 
 import com.rabbitmq.client._
 
 import java.nio.charset.StandardCharsets
 
-// Testclient which consumes messages and writes something in other queue
-
-object RabbitMQConsumer {
+/**
+  * Simple RabbitMQClient which consumes messages from one broker and write them to other broker.
+  */
+object SimpleRabbitMQClient {
 
   val deliverCallback: DeliverCallback = {
-    new DeliverCallback {
-      override def handle(consumerTag: String, message: Delivery): Unit = {
-        println("Received a message")
-        val connection = getConnection(writePort)
-        val channel = connection.createChannel()
-        channel.queueDeclare(writeQueue, true, false, false, null)
-        channel.basicPublish("", writeQueue, message.getProperties, "Message processed".getBytes(StandardCharsets.UTF_8))
-      }
+    (consumerTag: String, message: Delivery) => {
+      println("Received a message")
+      val connection = getConnection(writePort)
+      val channel = connection.createChannel()
+      channel.queueDeclare(writeQueue, true, false, false, null)
+      channel.basicPublish("", writeQueue, message.getProperties, "Message processed".getBytes(StandardCharsets.UTF_8))
     }
   }
 
-  val cancelCallback = new CancelCallback {
-    override def handle(consumerTag: String): Unit = {
-    }
+  val cancelCallback: CancelCallback = (consumerTag: String) => {
   }
 
-  def readAndWrite() = {
+  def readAndWrite(): String = {
     val connection = getConnection(readPort)
     val channel = connection.createChannel()
     channel.queueDeclare(readQueue, true, false, false, null)
-    channel.basicConsume(readQueue,true, deliverCallback, cancelCallback)
+    channel.basicConsume(readQueue, true, deliverCallback, cancelCallback)
 
   }
 

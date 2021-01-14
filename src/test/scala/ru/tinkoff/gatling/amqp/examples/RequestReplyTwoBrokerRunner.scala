@@ -4,16 +4,14 @@ import io.gatling.app.Gatling
 import io.gatling.core.config.GatlingPropertiesBuilder
 
 /**
- * This object simply provides a `main` method that wraps
- * [[io.gatling.app.Gatling]].main, which
- * allows us to do some configuration and setup before
- * Gatling launches.
- */
-object RequestReplyTwoBrokerRunnerRunner {
+  * This object simply provides a `main` method that wraps
+  * [[io.gatling.app.Gatling]].main, which
+  * allows us to do some configuration and setup before
+  * Gatling launches.
+  */
+object RequestReplyTwoBrokerRunner {
 
   def main(args: Array[String]) {
-
-
     // This sets the class for the simulation we want to run.
     val simClass = classOf[RequestReplyTwoBrokerExample].getName
 
