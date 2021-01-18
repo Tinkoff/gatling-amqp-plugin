@@ -30,14 +30,6 @@ object SimpleRabbitMQClient {
 
   }
 
-  def main(args: Array[String]): Unit = {
-    setup()
-    readAndWrite()
-    Thread.sleep(1000000)
-    tearDown()
-    System.exit(1)
-  }
-
   private val readQueue = "readQueue"
   private val readPort = 5672
 

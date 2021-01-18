@@ -2,10 +2,13 @@ package ru.tinkoff.gatling.amqp.examples
 
 import io.gatling.core.Predef._
 import io.gatling.core.structure.ScenarioBuilder
+import jodd.util.ThreadUtil
 import ru.tinkoff.gatling.amqp.Predef._
 import ru.tinkoff.gatling.amqp.examples.Utils.idFeeder
+import ru.tinkoff.gatling.amqp.examples.utils.SimpleRabbitMQClient
 import ru.tinkoff.gatling.amqp.protocol.AmqpProtocolBuilder
 
+import scala.Console.println
 import scala.concurrent.duration._
 
 /**
@@ -13,10 +16,24 @@ import scala.concurrent.duration._
   * - start docker-compose for the `docker-compose.yaml` - docker-compose -f docker-compose.yml up
   * -- open http://localhost:15672 (gatling publishes messages here), user: guest, password: guest
   * -- open http://localhost:15673 (consumer writes messages here), user: guest, password: guest
-  * - run `SimpleRabbitMQClient` - this class implements a consumer for queue readQueue which reads from it and writes to _writeQueue_
-  * - run RequestReplyGatlingRunner from IDE - it will write to readQueue and read messages from writeQueue
+  * - run RequestReplyGatlingRunner from IDE - it will
+  * -- start the messageConsumer SimpleRabbitMQClient
+  * -- gatling publish messages to readQueue, simpleClient reads them
+  * -- gatling receives messages from writeQueue, simple client has them written
   */
 class RequestReplyTwoBrokerExample extends Simulation {
+
+  before {
+    // For this test-example we define a consumer in your setup this should not be required, because
+    // you already have a rabbitmq-consumer.
+    SimpleRabbitMQClient.setup()
+    SimpleRabbitMQClient.readAndWrite()
+  }
+
+  after{
+    SimpleRabbitMQClient.tearDown()
+  }
+
 
   val amqpConf: AmqpProtocolBuilder = amqp
     .connectionFactory(
