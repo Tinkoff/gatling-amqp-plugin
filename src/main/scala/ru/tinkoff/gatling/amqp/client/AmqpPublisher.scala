@@ -41,5 +41,5 @@ class AmqpPublisher(destination: AmqpExchange, components: AmqpComponents) exten
     }
   }
 
-  override protected val pool: AmqpConnectionPool = components.connectionPool
+  override protected val pool: AmqpConnectionPool = components.connectionPublishPool
 }

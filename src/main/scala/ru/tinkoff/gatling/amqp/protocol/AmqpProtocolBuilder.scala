@@ -4,7 +4,8 @@ import com.rabbitmq.client.ConnectionFactory
 import javax.jms.DeliveryMode
 import ru.tinkoff.gatling.amqp.request.AmqpProtocolMessage
 
-case class AmqpProtocolBuilder(connectionFactory: ConnectionFactory,
+case class AmqpProtocolBuilder(requestConnectionFactory: ConnectionFactory,
+                               replyConnectionFactory: ConnectionFactory,
                                deliveryMode: Int = DeliveryMode.NON_PERSISTENT,
                                messageMatcher: AmqpMessageMatcher = MessageIdMessageMatcher,
                                consumerThreadsCount: Int = 1,
@@ -27,5 +28,5 @@ case class AmqpProtocolBuilder(connectionFactory: ConnectionFactory,
   def consumerThreadsCount(threadCount: Int): AmqpProtocolBuilder = copy(consumerThreadsCount = threadCount)
 
   def build =
-    AmqpProtocol(connectionFactory, deliveryMode, replyTimeout, consumerThreadsCount, messageMatcher, responseTransformer)
+    AmqpProtocol(requestConnectionFactory, replyConnectionFactory, deliveryMode, replyTimeout, consumerThreadsCount, messageMatcher, responseTransformer)
 }

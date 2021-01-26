@@ -16,6 +16,10 @@ trait AmqpDsl extends AmqpCheckSupport {
   def rabbitmq(implicit configuration: GatlingConfiguration): RabbitMQConnectionFactoryBuilderBase.type =
     RabbitMQConnectionFactoryBuilderBase
 
+  def rabbitReceiver(implicit configuration: GatlingConfiguration): RabbitMQConnectionFactoryBuilderBase.type =
+    RabbitMQConnectionFactoryBuilderBase
+
+
   implicit def amqpProtocolBuilder2amqpProtocol(builder: AmqpProtocolBuilder): AmqpProtocol = builder.build
 
   implicit def amqpPublishDslBuilder2ActionBuilder(builder: PublishDslBuilder): ActionBuilder = builder.build()
