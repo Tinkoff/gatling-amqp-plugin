@@ -20,6 +20,7 @@ class PublishExample extends Simulation {
         .vhost("/")
     )
     .usePersistentDeliveryMode
+    .declare(queue("test_q_in"))
 
   val scn: ScenarioBuilder = scenario("AMQP test")
     .feed(idFeeder)
