@@ -1,5 +1,0 @@
-language: scala
-jdk:
-  - openjdk11
-script:
-  - sbt compile
