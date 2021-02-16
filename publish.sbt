@@ -3,13 +3,6 @@ ThisBuild / scalaVersion := "2.12.12"
 
 ThisBuild / publishMavenStyle := true
 
-ThisBuild / publishTo := Some(
-  if (isSnapshot.value)
-    Opts.resolver.sonatypeSnapshots
-  else
-    Opts.resolver.sonatypeStaging
-)
-
 ThisBuild / scmInfo := Some(
   ScmInfo(
     url("https://github.com/TinkoffCreditSystems/gatling-amqp-plugin"),
