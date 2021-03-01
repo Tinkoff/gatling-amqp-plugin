@@ -1,8 +1,8 @@
 package ru.tinkoff.gatling.amqp.examples
 
+import com.rabbitmq.client.BuiltinExchangeType
 import io.gatling.core.Predef._
 import io.gatling.core.structure.ScenarioBuilder
-
 import ru.tinkoff.gatling.amqp.Predef._
 import ru.tinkoff.gatling.amqp.examples.Utils.idFeeder
 import ru.tinkoff.gatling.amqp.protocol.AmqpProtocolBuilder
@@ -10,6 +10,10 @@ import ru.tinkoff.gatling.amqp.protocol.AmqpProtocolBuilder
 import scala.concurrent.duration._
 
 class RequestReplyExample extends Simulation{
+  private val topic = exchange("test_queue_in", BuiltinExchangeType.TOPIC)
+  private val innerQ = queue("test_queue_inner_in")
+  private val outQueue = queue("test_queue_out")
+
   val amqpConf: AmqpProtocolBuilder = amqp
     .connectionFactory(
       rabbitmq
@@ -23,6 +27,10 @@ class RequestReplyExample extends Simulation{
     .consumerThreadsCount(8)
     .matchByMessageId
     .usePersistentDeliveryMode
+    .declare(topic)
+    .declare(innerQ)
+    .declare(outQueue)
+    .bindQueue(innerQ, topic, "we")
 
   val scn: ScenarioBuilder = scenario("AMQP test")
     .feed(idFeeder)
