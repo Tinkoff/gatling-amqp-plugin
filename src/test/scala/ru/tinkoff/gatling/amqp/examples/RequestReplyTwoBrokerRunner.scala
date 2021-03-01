@@ -11,7 +11,7 @@ import io.gatling.core.config.GatlingPropertiesBuilder
   */
 object RequestReplyTwoBrokerRunner {
 
-  def main(args: Array[String]) {
+  def main(args: Array[String]): Unit = {
     // This sets the class for the simulation we want to run.
     val simClass = classOf[RequestReplyTwoBrokerExample].getName
 

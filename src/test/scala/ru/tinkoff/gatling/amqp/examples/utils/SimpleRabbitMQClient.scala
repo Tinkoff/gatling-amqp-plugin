@@ -8,24 +8,23 @@ import java.nio.charset.StandardCharsets
   * Simple RabbitMQClient which consumes messages from one broker and write them to other broker.
   */
 object SimpleRabbitMQClient {
-  private val readQueue = "readQueue"
-  private val readPort = 5672
+  private val readQueue   = "readQueue"
+  private val readPort    = 5672
   private val readChannel = getConnection(readPort).createChannel()
 
-  private val writeQueue = "writeQueue"
-  private val writePort = 5673
+  private val writeQueue   = "writeQueue"
+  private val writePort    = 5673
   private val writeChannel = getConnection(writePort).createChannel()
 
-  val deliverCallback: DeliverCallback = {
-    (consumerTag: String, message: Delivery) => {
+  val deliverCallback: DeliverCallback = { (consumerTag: String, message: Delivery) =>
+    {
       println("Received a message")
       writeChannel.queueDeclare(writeQueue, true, false, false, null)
       writeChannel.basicPublish("", writeQueue, message.getProperties, "Message processed".getBytes(StandardCharsets.UTF_8))
     }
   }
 
-  val cancelCallback: CancelCallback = (consumerTag: String) => {
-  }
+  val cancelCallback: CancelCallback = (consumerTag: String) => {}
 
   def readAndWrite(): String = {
     readChannel.queueDeclare(readQueue, true, false, false, null)
@@ -46,7 +45,7 @@ object SimpleRabbitMQClient {
     val connectionFactory = new ConnectionFactory()
     connectionFactory.setHost("localhost")
     connectionFactory.setPort(port)
-    val connection = connectionFactory.newConnection()
+    val connection        = connectionFactory.newConnection()
     connection
   }
 

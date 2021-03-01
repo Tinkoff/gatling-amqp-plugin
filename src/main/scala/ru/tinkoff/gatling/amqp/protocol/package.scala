@@ -7,6 +7,13 @@ import ru.tinkoff.gatling.amqp.request.AmqpProtocolMessage
 import java.util.UUID
 
 package object protocol {
+  sealed trait DeliveryMode {
+    val mode: Int
+  }
+
+  final case class Persistent(mode: Int = 2)    extends DeliveryMode
+  final case class NonPersistent(mode: Int = 1) extends DeliveryMode
+
   trait AmqpMessageMatcher {
     def prepareRequest(msg: AmqpProtocolMessage): AmqpProtocolMessage = msg
     def requestMatchId(msg: AmqpProtocolMessage): String
@@ -21,8 +28,8 @@ package object protocol {
   object CorrelationIdMessageMatcher extends AmqpMessageMatcher {
     override def prepareRequest(msg: AmqpProtocolMessage): AmqpProtocolMessage =
       msg.correlationId(FastUUID.toString(UUID.randomUUID))
-    override def requestMatchId(msg: AmqpProtocolMessage): String  = msg.correlationId
-    override def responseMatchId(msg: AmqpProtocolMessage): String = msg.correlationId
+    override def requestMatchId(msg: AmqpProtocolMessage): String              = msg.correlationId
+    override def responseMatchId(msg: AmqpProtocolMessage): String             = msg.correlationId
   }
 
   case class AmqpProtocolMessageMatcher(extractId: AmqpProtocolMessage => String) extends AmqpMessageMatcher {
@@ -35,7 +42,7 @@ package object protocol {
 
     /**
       * Builder with default connection factory settings
-      * */
+      */
     def default: RabbitMQConnectionFactoryBuilder = RabbitMQConnectionFactoryBuilder()
   }
 
@@ -44,7 +51,7 @@ package object protocol {
   final case class QueueDeclare(q: AmqpQueue)       extends AmqpChannelInitAction
   final case class ExchangeDeclare(e: AmqpExchange) extends AmqpChannelInitAction
   final case class BindQueue(queueName: String, exchangeName: String, routingKey: String, args: Map[String, Any])
-    extends AmqpChannelInitAction
+      extends AmqpChannelInitAction
 
   type AmqpChannelInitActions = List[AmqpChannelInitAction]
 
@@ -53,7 +60,7 @@ package object protocol {
       exchangeType: BuiltinExchangeType,
       durable: Boolean,
       autoDelete: Boolean,
-      arguments: Map[String, Any],
+      arguments: Map[String, Any]
   )
 
   final case class AmqpQueue(

@@ -54,7 +54,7 @@ class AmqpMessageTrackerActor(statsEngine: StatsEngine, clock: Clock) extends Ba
 
   override def receive: Receive = {
     // message was sent; add the timestamps to the map
-    case messageSent: MessagePublished =>
+    case messageSent: MessagePublished               =>
       sentMessages += messageSent.matchId -> messageSent
       if (messageSent.replyTimeout > 0) {
         triggerPeriodicTimeoutScan()
@@ -68,7 +68,7 @@ class AmqpMessageTrackerActor(statsEngine: StatsEngine, clock: Clock) extends Ba
           processMessage(session, sent, received, checks, message, next, requestName)
       }
 
-    case TimeoutScan =>
+    case TimeoutScan                                 =>
       val now = clock.nowMillis
       sentMessages.valuesIterator.foreach { messagePublished =>
         val replyTimeout = messagePublished.replyTimeout
@@ -79,14 +79,16 @@ class AmqpMessageTrackerActor(statsEngine: StatsEngine, clock: Clock) extends Ba
 
       for (MessagePublished(matchId, sent, receivedTimeout, _, session, next, requestName) <- timedOutMessages) {
         sentMessages.remove(matchId)
-        executeNext(session.markAsFailed,
-                    sent,
-                    now,
-                    KO,
-                    next,
-                    requestName,
-                    None,
-                    Some(s"Reply timeout after $receivedTimeout ms"))
+        executeNext(
+          session.markAsFailed,
+          sent,
+          now,
+          KO,
+          next,
+          requestName,
+          None,
+          Some(s"Reply timeout after $receivedTimeout ms")
+        )
       }
       timedOutMessages.clear()
   }
@@ -101,7 +103,16 @@ class AmqpMessageTrackerActor(statsEngine: StatsEngine, clock: Clock) extends Ba
       responseCode: Option[String],
       message: Option[String]
   ): Unit = {
-    statsEngine.logResponse(session.scenario, session.groups, requestName, sent, received, status, responseCode, message)
+    statsEngine.logResponse(
+      session.scenario,
+      session.groups,
+      requestName,
+      sent,
+      received,
+      status,
+      responseCode,
+      message
+    )
     next ! session.logGroupRequestTimings(sent, received)
   }
 
@@ -120,8 +131,18 @@ class AmqpMessageTrackerActor(statsEngine: StatsEngine, clock: Clock) extends Ba
     val (newSession, error) = Check.check(message, session, checks)
     error match {
       case Some(Failure(errorMessage)) =>
-        executeNext(newSession.markAsFailed, sent, received, KO, next, requestName, message.responseCode, Some(errorMessage))
-      case _ => executeNext(newSession, sent, received, OK, next, requestName, message.responseCode, message.responseCode)
+        executeNext(
+          newSession.markAsFailed,
+          sent,
+          received,
+          KO,
+          next,
+          requestName,
+          message.responseCode,
+          Some(errorMessage)
+        )
+      case _                           =>
+        executeNext(newSession, sent, received, OK, next, requestName, message.responseCode, message.responseCode)
     }
   }
 }

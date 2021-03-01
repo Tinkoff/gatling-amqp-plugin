@@ -2,9 +2,11 @@ package ru.tinkoff.gatling.amqp.request
 
 import com.rabbitmq.client.AMQP
 
-case class AmqpProtocolMessage(amqpProperties: AMQP.BasicProperties,
-                               payload: Array[Byte],
-                               responseCode: Option[String] = None) {
+case class AmqpProtocolMessage(
+    amqpProperties: AMQP.BasicProperties,
+    payload: Array[Byte],
+    responseCode: Option[String] = None
+) {
   def correlationId(newValue: String): AmqpProtocolMessage =
     this.copy(amqpProperties = amqpProperties.builder.correlationId(newValue).build)
 

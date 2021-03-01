@@ -1,7 +1,5 @@
 package ru.tinkoff.gatling.amqp.checks
 
-import java.util.{Map => JMap}
-
 import com.fasterxml.jackson.databind.JsonNode
 import io.gatling.commons.validation._
 import io.gatling.core.Predef.Session
@@ -17,9 +15,14 @@ import io.gatling.core.json.JsonParsers
 import io.gatling.core.session.Expression
 import net.sf.saxon.s9api.XdmNode
 import ru.tinkoff.gatling.amqp.AmqpCheck
-import ru.tinkoff.gatling.amqp.checks.AmqpResponseCodeCheckBuilder.{AmqpMessageCheckType, ExtendedDefaultFindCheckBuilder, _}
+import ru.tinkoff.gatling.amqp.checks.AmqpResponseCodeCheckBuilder.{
+  AmqpMessageCheckType,
+  ExtendedDefaultFindCheckBuilder,
+  ResponseCode
+}
 import ru.tinkoff.gatling.amqp.request.AmqpProtocolMessage
 
+import java.util.{Map => JMap}
 import scala.annotation.implicitNotFound
 
 trait AmqpCheckSupport {
@@ -27,58 +30,68 @@ trait AmqpCheckSupport {
   val responseCode: ExtendedDefaultFindCheckBuilder[AmqpMessageCheckType, AmqpProtocolMessage, String] = ResponseCode
 
   @implicitNotFound("Could not find a CheckMaterializer. This check might not be valid for AMQP.")
-  implicit def checkBuilder2AmqpCheck[A, P, X](checkBuilder: CheckBuilder[A, P, X])(
-      implicit materializer: CheckMaterializer[A, AmqpCheck, AmqpProtocolMessage, P]): AmqpCheck =
+  implicit def checkBuilder2AmqpCheck[A, P, X](
+      checkBuilder: CheckBuilder[A, P, X]
+  )(implicit materializer: CheckMaterializer[A, AmqpCheck, AmqpProtocolMessage, P]): AmqpCheck =
     checkBuilder.build(materializer)
 
   @implicitNotFound("Could not find a CheckMaterializer. This check might not be valid for AMQP.")
-  implicit def validatorCheckBuilder2AmqpCheck[A, P, X](validatorCheckBuilder: ValidatorCheckBuilder[A, P, X])(
-      implicit materializer: CheckMaterializer[A, AmqpCheck, AmqpProtocolMessage, P]): AmqpCheck =
+  implicit def validatorCheckBuilder2AmqpCheck[A, P, X](
+      validatorCheckBuilder: ValidatorCheckBuilder[A, P, X]
+  )(implicit materializer: CheckMaterializer[A, AmqpCheck, AmqpProtocolMessage, P]): AmqpCheck =
     validatorCheckBuilder.exists
 
   @implicitNotFound("Could not find a CheckMaterializer. This check might not be valid for AMQP.")
-  implicit def findCheckBuilder2AmqpCheck[A, P, X](findCheckBuilder: FindCheckBuilder[A, P, X])(
-      implicit materializer: CheckMaterializer[A, AmqpCheck, AmqpProtocolMessage, P]): AmqpCheck =
+  implicit def findCheckBuilder2AmqpCheck[A, P, X](
+      findCheckBuilder: FindCheckBuilder[A, P, X]
+  )(implicit materializer: CheckMaterializer[A, AmqpCheck, AmqpProtocolMessage, P]): AmqpCheck =
     findCheckBuilder.find.exists
 
-  implicit def amqpXPathMaterializer(
-      implicit configuration: GatlingConfiguration): AmqpCheckMaterializer[XPathCheckType, XdmNode] =
+  implicit def amqpXPathMaterializer(implicit
+      configuration: GatlingConfiguration
+  ): AmqpCheckMaterializer[XPathCheckType, XdmNode] =
     AmqpCheckMaterializer.xpath(configuration)
 
-  implicit def amqpJsonPathMaterializer(
-      implicit jsonParsers: JsonParsers,
-      configuration: GatlingConfiguration): AmqpCheckMaterializer[JsonPathCheckType, JsonNode] =
+  implicit def amqpJsonPathMaterializer(implicit
+      jsonParsers: JsonParsers,
+      configuration: GatlingConfiguration
+  ): AmqpCheckMaterializer[JsonPathCheckType, JsonNode] =
     AmqpCheckMaterializer.jsonPath(jsonParsers, configuration)
 
-  implicit def amqpJmesPathMaterializer(
-      implicit jsonParsers: JsonParsers,
-      configuration: GatlingConfiguration): AmqpCheckMaterializer[JmesPathCheckType, JsonNode] =
+  implicit def amqpJmesPathMaterializer(implicit
+      jsonParsers: JsonParsers,
+      configuration: GatlingConfiguration
+  ): AmqpCheckMaterializer[JmesPathCheckType, JsonNode] =
     AmqpCheckMaterializer.jmesPath(jsonParsers, configuration)
 
-  implicit def amqpBodyStringMaterializer(
-      implicit configuration: GatlingConfiguration): AmqpCheckMaterializer[BodyStringCheckType, String] =
+  implicit def amqpBodyStringMaterializer(implicit
+      configuration: GatlingConfiguration
+  ): AmqpCheckMaterializer[BodyStringCheckType, String] =
     AmqpCheckMaterializer.bodyString(configuration)
 
-  implicit def amqpSubstringMaterializer(
-      implicit configuration: GatlingConfiguration): AmqpCheckMaterializer[SubstringCheckType, String] =
+  implicit def amqpSubstringMaterializer(implicit
+      configuration: GatlingConfiguration
+  ): AmqpCheckMaterializer[SubstringCheckType, String] =
     AmqpCheckMaterializer.substring(configuration)
 
   implicit def amqpBodyByteMaterializer: AmqpCheckMaterializer[BodyBytesCheckType, Array[Byte]] =
     AmqpCheckMaterializer.bodyBytes
 
   implicit val amqpStatusCheckMaterializer: AmqpCheckMaterializer[AmqpMessageCheckType, AmqpProtocolMessage] =
-    new AmqpCheckMaterializer[AmqpMessageCheckType, AmqpProtocolMessage](_.success)
+    AmqpCheckMaterializer.amqpStatusCheck
 
   implicit val amqpUntypedConditionalCheckWrapper: UntypedConditionalCheckWrapper[AmqpCheck] =
     (condition: Expression[Boolean], thenCheck: AmqpCheck) =>
       new Check[AmqpProtocolMessage] {
         private val typedCondition = (_: AmqpProtocolMessage, ses: Session) => condition(ses)
 
-        override def check(response: AmqpProtocolMessage,
-                           session: Session,
-                           preparedCache: JMap[Any, Any]): Validation[CheckResult] =
+        override def check(
+            response: AmqpProtocolMessage,
+            session: Session,
+            preparedCache: JMap[Any, Any]
+        ): Validation[CheckResult] =
           ConditionalCheck(typedCondition, thenCheck).check(response, session, preparedCache)
-    }
+      }
 
   implicit val amqpTypedConditionalCheckWrapper: TypedConditionalCheckWrapper[AmqpProtocolMessage, AmqpCheck] =
     (condition: (AmqpProtocolMessage, Session) => Validation[Boolean], thenCheck: AmqpCheck) =>

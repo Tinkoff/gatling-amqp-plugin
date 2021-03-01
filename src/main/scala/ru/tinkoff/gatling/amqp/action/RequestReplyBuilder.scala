@@ -8,11 +8,12 @@ import io.gatling.core.structure.ScenarioContext
 import ru.tinkoff.gatling.amqp.protocol.{AmqpComponents, AmqpProtocol}
 import ru.tinkoff.gatling.amqp.request.{AmqpAttributes, AmqpExchange}
 
-case class RequestReplyBuilder(attributes: AmqpAttributes,
-                               replyDest: AmqpExchange,
-                               setReplyTo: Boolean,
-                               configuration: GatlingConfiguration)
-    extends ActionBuilder {
+case class RequestReplyBuilder(
+    attributes: AmqpAttributes,
+    replyDest: AmqpExchange,
+    setReplyTo: Boolean,
+    configuration: GatlingConfiguration
+) extends ActionBuilder {
   private def components(protocolComponentsRegistry: ProtocolComponentsRegistry): AmqpComponents =
     protocolComponentsRegistry.components(AmqpProtocol.amqpProtocolKey)
 

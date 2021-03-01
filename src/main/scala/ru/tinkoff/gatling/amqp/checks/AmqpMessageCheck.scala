@@ -14,7 +14,11 @@ object AmqpMessageCheck {
 }
 
 case class AmqpMessageCheck(func: AmqpProtocolMessage => Boolean) extends AmqpCheck {
-  override def check(response: AmqpProtocolMessage, session: Session, preparedCache: JMap[Any, Any]): Validation[CheckResult] =
+  override def check(
+      response: AmqpProtocolMessage,
+      session: Session,
+      preparedCache: JMap[Any, Any]
+  ): Validation[CheckResult] =
     if (func(response)) {
       CheckResult.NoopCheckResultSuccess
     } else {

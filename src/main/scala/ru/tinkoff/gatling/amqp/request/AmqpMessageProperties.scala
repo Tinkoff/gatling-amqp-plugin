@@ -6,7 +6,7 @@ import com.rabbitmq.client.AMQP
 import io.gatling.commons.validation._
 import io.gatling.core.session.{Expression, Session}
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 case class AmqpMessageProperties(
     contentType: Option[Expression[String]] = None,
@@ -22,15 +22,17 @@ case class AmqpMessageProperties(
     `type`: Option[Expression[String]] = None,
     userId: Option[Expression[String]] = None,
     appId: Option[Expression[String]] = None,
-    clusterId: Option[Expression[String]] = None,
+    clusterId: Option[Expression[String]] = None
 )
 
 object AmqpMessageProperties {
 
   private implicit class OptExpressionUtil[T](val optExp: Option[Expression[T]]) extends AnyVal {
-    def apply(session: Session,
-              p: AMQP.BasicProperties.Builder,
-              setProperty: T => AMQP.BasicProperties.Builder): Validation[AMQP.BasicProperties.Builder] =
+    def apply(
+        session: Session,
+        p: AMQP.BasicProperties.Builder,
+        setProperty: T => AMQP.BasicProperties.Builder
+    ): Validation[AMQP.BasicProperties.Builder] =
       optExp.fold(p.success)(_(session).map(setProperty))
   }
 
@@ -50,17 +52,17 @@ object AmqpMessageProperties {
     userId(s, bp, bp.userId)
     appId(s, bp, bp.appId)
     clusterId(s, bp, bp.clusterId)
-      .flatMap(
-        b =>
-          headers
-            .foldLeft(Map.empty[String, AnyRef].success) {
-              case (resolvedHeaders, (key, value)) =>
-                for {
-                  v  <- value(s)
-                  rh <- resolvedHeaders
-                } yield rh + (key -> v)
-            }
-            .map(h => b.headers(h.asJava)))
+      .flatMap(b =>
+        headers
+          .foldLeft(Map.empty[String, AnyRef].success) {
+            case (resolvedHeaders, (key, value)) =>
+              for {
+                v  <- value(s)
+                rh <- resolvedHeaders
+              } yield rh + (key -> v)
+          }
+          .map(h => b.headers(h.asJava))
+      )
       .map(_.build())
 
   }

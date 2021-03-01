@@ -30,10 +30,9 @@ class RequestReplyTwoBrokerExample extends Simulation {
     SimpleRabbitMQClient.readAndWrite()
   }
 
-  after{
+  after {
     SimpleRabbitMQClient.tearDown()
   }
-
 
   val amqpConf: AmqpProtocolBuilder = amqp
     .connectionFactory(
@@ -73,9 +72,7 @@ class RequestReplyTwoBrokerExample extends Simulation {
     )
 
   setUp(
-    scn.inject(
-      rampUsersPerSec(1) to 5 during (60 seconds),
-      constantUsersPerSec(5) during (2 minutes))
+    scn.inject(rampUsersPerSec(1) to 5 during (60 seconds), constantUsersPerSec(5) during (2 minutes))
   ).protocols(amqpConf)
     .maxDuration(10 minutes)
 }

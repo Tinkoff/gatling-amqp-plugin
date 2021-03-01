@@ -21,17 +21,16 @@ abstract class AmqpAction(
   override def sendRequest(requestName: String, session: Session): Validation[Unit] =
     for {
       props             <- AmqpMessageProperties.toBasicProperties(attributes.messageProperties, session)
-      propsWithDelivery <- props.builder().deliveryMode(components.protocol.deliveryMode).build().success
-      message <- attributes.message
-                  .amqpProtocolMessage(session)
-                  .map(_.copy(amqpProperties = propsWithDelivery))
-                  .map(components.protocol.messageMatcher.prepareRequest)
-      around <- aroundPublish(requestName, session, message)
-    } yield
-      throttler
-        .fold(publisher.publish(message, around, session))(
-          _.throttle(session.scenario, () => publisher.publish(message, around, session))
-        )
+      propsWithDelivery <- props.builder().deliveryMode(components.protocol.deliveryMode.mode).build().success
+      message           <- attributes.message
+                             .amqpProtocolMessage(session)
+                             .map(_.copy(amqpProperties = propsWithDelivery))
+                             .map(components.protocol.messageMatcher.prepareRequest)
+      around            <- aroundPublish(requestName, session, message)
+    } yield throttler
+      .fold(publisher.publish(message, around, session))(
+        _.throttle(session.scenario, () => publisher.publish(message, around, session))
+      )
 
   protected def aroundPublish(requestName: String, session: Session, message: AmqpProtocolMessage): Validation[Around]
 

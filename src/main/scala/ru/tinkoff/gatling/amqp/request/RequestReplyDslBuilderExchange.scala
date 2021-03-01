@@ -13,12 +13,13 @@ case class RequestReplyDslBuilderExchange(requestName: Expression[String], confi
 
   def queueExchange(name: Expression[String]): RequestReplyDslBuilderMessage = destination(AmqpQueueExchange(name))
 
-  def destination(dest: AmqpExchange) = RequestReplyDslBuilderMessage(
-    requestName,
-    dest,
-    AmqpQueueExchange(""),
-    setReplyTo = false,
-    None,
-    configuration
-  )
+  def destination(dest: AmqpExchange): RequestReplyDslBuilderMessage =
+    RequestReplyDslBuilderMessage(
+      requestName,
+      dest,
+      AmqpQueueExchange(""),
+      setReplyTo = false,
+      None,
+      configuration
+    )
 }

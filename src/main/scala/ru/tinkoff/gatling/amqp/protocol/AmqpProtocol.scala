@@ -8,7 +8,7 @@ import ru.tinkoff.gatling.amqp.client.{AmqpConnectionPool, TrackerPool}
 import ru.tinkoff.gatling.amqp.request.AmqpProtocolMessage
 
 import java.util.concurrent.atomic.AtomicReference
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object AmqpProtocol {
   val amqpProtocolKey: ProtocolKey[AmqpProtocol, AmqpComponents] = new ProtocolKey[AmqpProtocol, AmqpComponents] {
@@ -42,7 +42,13 @@ object AmqpProtocol {
     private def getOrCreateTrackerPool(components: CoreComponents, pool: AmqpConnectionPool) = {
       if (trackerPoolRef.get() == null) {
         trackerPoolRef.lazySet(
-          new TrackerPool(pool, components.actorSystem, components.statsEngine, components.clock, components.configuration)
+          new TrackerPool(
+            pool,
+            components.actorSystem,
+            components.statsEngine,
+            components.clock,
+            components.configuration
+          )
         )
       }
       trackerPoolRef.get()
@@ -52,9 +58,9 @@ object AmqpProtocol {
       map.asJava.asInstanceOf[java.util.Map[String, Object]]
 
     private def runInitAction(c: Channel): PartialFunction[AmqpChannelInitAction, Unit] = {
-      case ExchangeDeclare(e) =>
+      case ExchangeDeclare(e)        =>
         c.exchangeDeclare(e.name, e.exchangeType, e.durable, e.autoDelete, toJavaMap(e.arguments))
-      case QueueDeclare(q) =>
+      case QueueDeclare(q)           =>
         c.queueDeclare(q.name, q.durable, q.exclusive, q.autoDelete, toJavaMap(q.arguments))
       case BindQueue(q, e, rk, args) =>
         c.queueBind(q, e, rk, toJavaMap(args))
@@ -65,7 +71,7 @@ object AmqpProtocol {
       amqpProtocol => {
         val requestPool = getOrCreateConnectionPublishPool(amqpProtocol)
         coreComponents.actorSystem.registerOnTermination(requestPool.close())
-        val replyPool = getOrCreateConnectionReplyPool(amqpProtocol)
+        val replyPool   = getOrCreateConnectionReplyPool(amqpProtocol)
         coreComponents.actorSystem.registerOnTermination(replyPool.close())
 
         amqpProtocol.initActions.foreach(runInitAction(requestPool.channel))
@@ -79,7 +85,7 @@ object AmqpProtocol {
 case class AmqpProtocol(
     connectionFactory: ConnectionFactory,
     replyConnectionFactory: ConnectionFactory,
-    deliveryMode: Int,
+    deliveryMode: DeliveryMode,
     replyTimeout: Option[Long],
     consumersThreadCount: Int,
     messageMatcher: AmqpMessageMatcher,

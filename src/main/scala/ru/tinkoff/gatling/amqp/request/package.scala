@@ -11,7 +11,7 @@ package object request {
   sealed trait AmqpExchange
 
   case class AmqpTopicExchange(name: Expression[String], routingKey: Expression[String], durable: Boolean = false)
-    extends AmqpExchange
+      extends AmqpExchange
 
   case class AmqpDirectExchange(name: Expression[String], routingKey: Expression[String], durable: Boolean = false)
       extends AmqpExchange
@@ -26,7 +26,7 @@ package object request {
     override private[amqp] def amqpProtocolMessage(session: Session) =
       text(session).map(str => AmqpProtocolMessage(MessageProperties.MINIMAL_BASIC, str.getBytes(charset)))
   }
-  case class BytesAmqpMessage(bytes: Expression[Array[Byte]]) extends AmqpMessage {
+  case class BytesAmqpMessage(bytes: Expression[Array[Byte]])            extends AmqpMessage {
     override private[amqp] def amqpProtocolMessage(session: Session) =
       bytes(session).map(AmqpProtocolMessage(MessageProperties.MINIMAL_BASIC, _))
   }

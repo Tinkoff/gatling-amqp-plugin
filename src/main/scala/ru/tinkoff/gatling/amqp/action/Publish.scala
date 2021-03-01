@@ -11,19 +11,21 @@ import io.gatling.core.stats.StatsEngine
 import ru.tinkoff.gatling.amqp.protocol.AmqpComponents
 import ru.tinkoff.gatling.amqp.request.{AmqpAttributes, AmqpProtocolMessage}
 
-class Publish(attributes: AmqpAttributes,
-              components: AmqpComponents,
-              val statsEngine: StatsEngine,
-              val clock: Clock,
-              val next: Action,
-              throttler: Option[Throttler]
-             )
-    extends AmqpAction(attributes, components, throttler) {
+class Publish(
+    attributes: AmqpAttributes,
+    components: AmqpComponents,
+    val statsEngine: StatsEngine,
+    val clock: Clock,
+    val next: Action,
+    throttler: Option[Throttler]
+) extends AmqpAction(attributes, components, throttler) {
   override val name: String = genName("amqpPublish")
 
-  override protected def aroundPublish(requestName: String,
-                                       session: Session,
-                                       message: AmqpProtocolMessage): Validation[Around] =
+  override protected def aroundPublish(
+      requestName: String,
+      session: Session,
+      message: AmqpProtocolMessage
+  ): Validation[Around] =
     Around(
       before = {
         if (logger.underlying.isDebugEnabled) {
@@ -32,7 +34,7 @@ class Publish(attributes: AmqpAttributes,
 
         val now = clock.nowMillis
 
-        statsEngine.logResponse(session.scenario,session.groups, requestName, now, now, OK, None, None)
+        statsEngine.logResponse(session.scenario, session.groups, requestName, now, now, OK, None, None)
 
         next ! session
       },

@@ -46,8 +46,8 @@ case class PublishDslBuilder(attributes: AmqpAttributes, factory: AmqpAttributes
   def header(key: String, value: Expression[String]): PublishDslBuilder =
     this.modify(_.attributes.messageProperties.headers).using(_ + (key -> value))
 
-  def headers(hs: (String, Expression[String])*): PublishDslBuilder =
+  def headers(hs: (String, Expression[String])*): PublishDslBuilder     =
     hs.foldLeft(this) { case (rb, (k, v)) => rb.header(k, v) }
 
-  def build(): ActionBuilder = factory(attributes)
+  def build(): ActionBuilder                                            = factory(attributes)
 }

@@ -25,15 +25,19 @@ class RequestReply(
 
   override def name: String = genName("amqpRequestReply")
 
-  override protected def aroundPublish(requestName: String,
-                                       session: Session,
-                                       message: AmqpProtocolMessage): Validation[Around] = {
+  override protected def aroundPublish(
+      requestName: String,
+      session: Session,
+      message: AmqpProtocolMessage
+  ): Validation[Around] = {
     resolveDestination(replyDestination, session).map { qName =>
-      val tracker = components.trackerPool.tracker(qName,
-                                                   components.protocol.consumersThreadCount,
-                                                   components.protocol.messageMatcher,
-                                                   components.protocol.responseTransformer)
-      val id = components.protocol.messageMatcher.requestMatchId(message)
+      val tracker = components.trackerPool.tracker(
+        qName,
+        components.protocol.consumersThreadCount,
+        components.protocol.messageMatcher,
+        components.protocol.responseTransformer
+      )
+      val id      = components.protocol.messageMatcher.requestMatchId(message)
       Around(
         before = {
 
@@ -52,7 +56,7 @@ class RequestReply(
     dest match {
       case AmqpDirectExchange(name, _, _) => name(session)
       case AmqpQueueExchange(name, _)     => name(session)
-      case AmqpTopicExchange(name, _, _) => name(session)
+      case AmqpTopicExchange(name, _, _)  => name(session)
     }
 
 }

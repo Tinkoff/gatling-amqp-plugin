@@ -4,7 +4,7 @@ import com.typesafe.scalalogging.StrictLogging
 import ru.tinkoff.gatling.amqp.request.AmqpProtocolMessage
 
 package object action {
-  object Around {
+  object Around                                       {
     def apply(before: Unit, after: Unit): Around = new Around(() => before, () => after)
   }
   class Around(before: () => Unit, after: () => Unit) {

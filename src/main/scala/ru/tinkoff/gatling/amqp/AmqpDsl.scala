@@ -19,25 +19,30 @@ trait AmqpDsl extends AmqpCheckSupport {
   def rabbitReceiver(implicit configuration: GatlingConfiguration): RabbitMQConnectionFactoryBuilderBase.type =
     RabbitMQConnectionFactoryBuilderBase
 
-  def queue(name: String,
-            durable: Boolean = true,
-            exclusive: Boolean = false,
-            autoDelete: Boolean = true,
-            arguments: Map[String, Any] = Map.empty): AmqpQueue =
+  def queue(
+      name: String,
+      durable: Boolean = true,
+      exclusive: Boolean = false,
+      autoDelete: Boolean = true,
+      arguments: Map[String, Any] = Map.empty
+  ): AmqpQueue =
     AmqpQueue(name, durable, exclusive, autoDelete, arguments)
 
-  def exchange(name: String,
-               exchangeType: BuiltinExchangeType,
-               durable: Boolean = true,
-               autoDelete: Boolean = true,
-               arguments: Map[String, Any] = Map.empty): AmqpExchange =
+  def exchange(
+      name: String,
+      exchangeType: BuiltinExchangeType,
+      durable: Boolean = true,
+      autoDelete: Boolean = true,
+      arguments: Map[String, Any] = Map.empty
+  ): AmqpExchange =
     AmqpExchange(name, exchangeType, durable, autoDelete, arguments)
 
   implicit def amqpProtocolBuilder2amqpProtocol(builder: AmqpProtocolBuilder): AmqpProtocol = builder.build
 
   implicit def amqpPublishDslBuilder2ActionBuilder(builder: PublishDslBuilder): ActionBuilder = builder.build()
 
-  implicit def amqpRequestReplyDslBuilder2ActionBuilder(builder: RequestReplyDslBuilder): ActionBuilder = builder.build()
+  implicit def amqpRequestReplyDslBuilder2ActionBuilder(builder: RequestReplyDslBuilder): ActionBuilder =
+    builder.build()
 
   implicit def rabbitMQ2ConnectionFactory(builder: RabbitMQConnectionFactoryBuilder): ConnectionFactory = builder.build
 }

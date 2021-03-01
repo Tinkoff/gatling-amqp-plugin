@@ -1,8 +1,8 @@
 package ru.tinkoff.gatling.amqp.client
 
 import java.util.concurrent.ConcurrentHashMap
-
 import akka.actor.ActorSystem
+import com.rabbitmq.client.Delivery
 import io.gatling.commons.util.Clock
 import io.gatling.core.config.GatlingConfiguration
 import io.gatling.core.stats.StatsEngine
@@ -22,10 +22,12 @@ class TrackerPool(
 
   private val trackers = new ConcurrentHashMap[String, AmqpMessageTracker]
 
-  def tracker(sourceQueue: String,
-              listenerThreadCount: Int,
-              messageMatcher: AmqpMessageMatcher,
-              responseTransformer: Option[AmqpProtocolMessage => AmqpProtocolMessage]): AmqpMessageTracker =
+  def tracker(
+      sourceQueue: String,
+      listenerThreadCount: Int,
+      messageMatcher: AmqpMessageMatcher,
+      responseTransformer: Option[AmqpProtocolMessage => AmqpProtocolMessage]
+  ): AmqpMessageTracker =
     trackers.computeIfAbsent(
       sourceQueue,
       _ => {
@@ -37,16 +39,21 @@ class TrackerPool(
           consumerChannel.basicConsume(
             sourceQueue,
             true,
-            (_, message) => {
+            (_: String, message: Delivery) => {
               val receivedTimestamp = clock.nowMillis
               val amqpMessage       = AmqpProtocolMessage(message.getProperties, message.getBody)
               val replyId           = messageMatcher.responseMatchId(amqpMessage)
-              logMessage(s"Message received AmqpMessageID=${message.getProperties.getMessageId} matchId=$replyId", amqpMessage)
-              actor ! MessageConsumed(replyId,
-                                      receivedTimestamp,
-                                      responseTransformer.map(_(amqpMessage)).getOrElse(amqpMessage))
+              logMessage(
+                s"Message received AmqpMessageID=${message.getProperties.getMessageId} matchId=$replyId",
+                amqpMessage
+              )
+              actor ! MessageConsumed(
+                replyId,
+                receivedTimestamp,
+                responseTransformer.map(_(amqpMessage)).getOrElse(amqpMessage)
+              )
             },
-            _ => ()
+            (_: String) => ()
           )
         }
 

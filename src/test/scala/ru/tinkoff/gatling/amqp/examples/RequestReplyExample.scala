@@ -9,9 +9,9 @@ import ru.tinkoff.gatling.amqp.protocol.AmqpProtocolBuilder
 
 import scala.concurrent.duration._
 
-class RequestReplyExample extends Simulation{
-  private val topic = exchange("test_queue_in", BuiltinExchangeType.TOPIC)
-  private val innerQ = queue("test_queue_inner_in")
+class RequestReplyExample extends Simulation {
+  private val topic    = exchange("test_queue_in", BuiltinExchangeType.TOPIC)
+  private val innerQ   = queue("test_queue_inner_in")
   private val outQueue = queue("test_queue_out")
 
   val amqpConf: AmqpProtocolBuilder = amqp
@@ -42,7 +42,7 @@ class RequestReplyExample extends Simulation{
         .messageId("${id}")
         .priority(0)
         .contentType("application/json")
-        .headers("test"-> "performance", "extra-test" -> "34-${id}")
+        .headers("test" -> "performance", "extra-test" -> "34-${id}")
         .check(
           bodyString.exists,
           bodyString.is("Message processed")
@@ -50,9 +50,7 @@ class RequestReplyExample extends Simulation{
     )
 
   setUp(
-    scn.inject(
-      rampUsersPerSec(1) to 5 during (60 seconds),
-      constantUsersPerSec(5) during (2 minutes))
+    scn.inject(rampUsersPerSec(1) to 5 during (60 seconds), constantUsersPerSec(5) during (2 minutes))
   ).protocols(amqpConf)
     .maxDuration(10 minutes)
 }
