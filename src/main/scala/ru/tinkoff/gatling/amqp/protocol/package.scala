@@ -1,9 +1,10 @@
 package ru.tinkoff.gatling.amqp
 
-import java.util.UUID
-
 import com.eatthepath.uuid.FastUUID
+import com.rabbitmq.client.BuiltinExchangeType
 import ru.tinkoff.gatling.amqp.request.AmqpProtocolMessage
+
+import java.util.UUID
 
 package object protocol {
   trait AmqpMessageMatcher {
@@ -18,13 +19,14 @@ package object protocol {
   }
 
   object CorrelationIdMessageMatcher extends AmqpMessageMatcher {
-    override def prepareRequest(msg: AmqpProtocolMessage): AmqpProtocolMessage    = msg.correlationId(FastUUID.toString(UUID.randomUUID))
+    override def prepareRequest(msg: AmqpProtocolMessage): AmqpProtocolMessage =
+      msg.correlationId(FastUUID.toString(UUID.randomUUID))
     override def requestMatchId(msg: AmqpProtocolMessage): String  = msg.correlationId
     override def responseMatchId(msg: AmqpProtocolMessage): String = msg.correlationId
   }
 
   case class AmqpProtocolMessageMatcher(extractId: AmqpProtocolMessage => String) extends AmqpMessageMatcher {
-    override def requestMatchId(msg: AmqpProtocolMessage): String = extractId(msg)
+    override def requestMatchId(msg: AmqpProtocolMessage): String  = extractId(msg)
     override def responseMatchId(msg: AmqpProtocolMessage): String = extractId(msg)
   }
 
@@ -36,4 +38,29 @@ package object protocol {
       * */
     def default: RabbitMQConnectionFactoryBuilder = RabbitMQConnectionFactoryBuilder()
   }
+
+  sealed trait AmqpChannelInitAction
+
+  final case class QueueDeclare(q: AmqpQueue)       extends AmqpChannelInitAction
+  final case class ExchangeDeclare(e: AmqpExchange) extends AmqpChannelInitAction
+  final case class BindQueue(queueName: String, exchangeName: String, routingKey: String, args: Map[String, Any])
+    extends AmqpChannelInitAction
+
+  type AmqpChannelInitActions = List[AmqpChannelInitAction]
+
+  final case class AmqpExchange(
+      name: String,
+      exchangeType: BuiltinExchangeType,
+      durable: Boolean,
+      autoDelete: Boolean,
+      arguments: Map[String, Any],
+  )
+
+  final case class AmqpQueue(
+      name: String,
+      durable: Boolean,
+      exclusive: Boolean,
+      autoDelete: Boolean,
+      arguments: Map[String, Any]
+  )
 }
