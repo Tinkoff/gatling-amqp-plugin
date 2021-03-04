@@ -1,5 +1,5 @@
 # Gatling AMQP Plugin 
-![Build](https://github.com/TinkoffCreditSystems/gatling-amqp-plugin/workflows/Build/badge.svg) [![Maven Central](https://img.shields.io/maven-central/v/ru.tinkoff/gatling-amqp-plugin_2.12.svg?color=success)](https://search.maven.org/search?q=ru.tinkoff.gatling-amqp-plugin)
+![Build](https://github.com/TinkoffCreditSystems/gatling-amqp-plugin/workflows/Build/badge.svg) [![Maven Central](https://img.shields.io/maven-central/v/ru.tinkoff/gatling-amqp-plugin_2.13.svg?color=success)](https://search.maven.org/search?q=ru.tinkoff.gatling-amqp-plugin)
 
 Plugin for support performance testing with AMQP in Gatling(3.5.x)
 
