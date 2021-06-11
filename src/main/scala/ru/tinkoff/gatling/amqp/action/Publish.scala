@@ -1,13 +1,12 @@
 package ru.tinkoff.gatling.amqp.action
 
-import io.gatling.commons.stats.OK
+import io.gatling.commons.stats.{KO, OK}
 import io.gatling.commons.util.Clock
-import io.gatling.commons.validation.{Validation, _}
 import io.gatling.core.action.Action
-import io.gatling.core.config.GatlingConfiguration
 import io.gatling.core.controller.throttle.Throttler
-import io.gatling.core.session.Session
+import io.gatling.core.session.{Expression, Session}
 import io.gatling.core.stats.StatsEngine
+import ru.tinkoff.gatling.amqp.client.AmqpPublisher
 import ru.tinkoff.gatling.amqp.protocol.AmqpComponents
 import ru.tinkoff.gatling.amqp.request.{AmqpAttributes, AmqpProtocolMessage}
 
@@ -21,23 +20,31 @@ class Publish(
 ) extends AmqpAction(attributes, components, throttler) {
   override val name: String = genName("amqpPublish")
 
-  override protected def aroundPublish(
-      requestName: String,
-      session: Session,
-      message: AmqpProtocolMessage
-  ): Validation[Around] =
-    Around(
-      before = {
-        if (logger.underlying.isDebugEnabled) {
-          logMessage(s"Message sent user=${session.userId} AMQPMessageID=${message.messageId}", message)
-        }
+  override val requestName: Expression[String] = attributes.requestName
 
-        val now = clock.nowMillis
-
-        statsEngine.logResponse(session.scenario, session.groups, requestName, now, now, OK, None, None)
-
-        next ! session
-      },
-      after = ()
-    ).success
+  override protected def publishAndLogMessage(requestNameString: String,
+                                              msg: AmqpProtocolMessage,
+                                              session: Session,
+                                              publisher: AmqpPublisher): Unit = {
+    val now = clock.nowMillis
+    try {
+      publisher.publish(msg, session)
+      if (logger.underlying.isDebugEnabled) {
+        logMessage(s"Message sent user=${session.userId} AMQPMessageID=${msg.messageId}", msg)
+      }
+      statsEngine.logResponse(session.scenario, session.groups, requestNameString, now, clock.nowMillis, OK, None, None)
+    } catch {
+      case e: Throwable =>
+        logger.error(e.getMessage, e)
+        statsEngine.logResponse(session.scenario,
+                                session.groups,
+                                requestNameString,
+                                now,
+                                clock.nowMillis,
+                                KO,
+                                Some("500"),
+                                Some(e.getMessage))
+    }
+    next ! session
+  }
 }

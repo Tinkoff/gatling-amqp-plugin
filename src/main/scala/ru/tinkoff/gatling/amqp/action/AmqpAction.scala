@@ -22,16 +22,19 @@ abstract class AmqpAction(
     for {
       props             <- AmqpMessageProperties.toBasicProperties(attributes.messageProperties, session)
       propsWithDelivery <- props.builder().deliveryMode(components.protocol.deliveryMode.mode).build().success
-      message           <- attributes.message
-                             .amqpProtocolMessage(session)
-                             .map(_.copy(amqpProperties = propsWithDelivery))
-                             .map(components.protocol.messageMatcher.prepareRequest)
-      around            <- aroundPublish(requestName, session, message)
-    } yield throttler
-      .fold(publisher.publish(message, around, session))(
-        _.throttle(session.scenario, () => publisher.publish(message, around, session))
-      )
+      message <- attributes.message
+                  .amqpProtocolMessage(session)
+                  .map(_.copy(amqpProperties = propsWithDelivery))
+                  .map(components.protocol.messageMatcher.prepareRequest)
+    } yield
+      throttler
+        .fold(publishAndLogMessage(requestName, message, session))(
+          _.throttle(session.scenario, () => publishAndLogMessage(requestName, message, session))
+        )
 
-  protected def aroundPublish(requestName: String, session: Session, message: AmqpProtocolMessage): Validation[Around]
+  protected def publishAndLogMessage(requestNameString: String,
+                                     msg: AmqpProtocolMessage,
+                                     session: Session,
+                                     publisher: AmqpPublisher = publisher): Unit
 
 }

@@ -25,8 +25,6 @@ case class RequestReplyBuilder(
     new RequestReply(
       attributes,
       replyDest,
-      setReplyTo,
-      None,
       amqpComponents,
       statsEngine,
       coreComponents.clock,

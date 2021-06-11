@@ -32,7 +32,7 @@ class TrackerPool(
       sourceQueue,
       _ => {
         val actor =
-          system.actorOf(AmqpMessageTrackerActor.props(statsEngine, clock, configuration), genName("amqpTrackerActor"))
+          system.actorOf(AmqpMessageTrackerActor.props(statsEngine, clock), genName("amqpTrackerActor"))
 
         for (_ <- 1 to listenerThreadCount) {
           val consumerChannel = pool.createConsumerChannel
