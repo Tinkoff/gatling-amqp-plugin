@@ -7,6 +7,6 @@ case object AmqpProtocolBuilderBase {
   def connectionFactory(
       requestConnectionFactory: ConnectionFactory,
       replyConnectionFactory: ConnectionFactory
-  ): AmqpProtocolBuilder                                            =
+  ): AmqpProtocolBuilder =
     AmqpProtocolBuilder(requestConnectionFactory, replyConnectionFactory)
 }

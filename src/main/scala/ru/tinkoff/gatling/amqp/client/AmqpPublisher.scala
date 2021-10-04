@@ -14,12 +14,11 @@ class AmqpPublisher(destination: AmqpExchange, components: AmqpComponents) exten
           exKey  <- routingKey(session)
         } withChannel(channel => channel.basicPublish(exName, exKey, message.amqpProperties, message.payload))
 
-      case AmqpQueueExchange(name, _)              =>
+      case AmqpQueueExchange(name, _) =>
         name(session).foreach(qName =>
-          withChannel(channel => channel.basicPublish("", qName, message.amqpProperties, message.payload))
-        )
+          withChannel(channel => channel.basicPublish("", qName, message.amqpProperties, message.payload)))
 
-      case AmqpTopicExchange(name, routingKey, _)  =>
+      case AmqpTopicExchange(name, routingKey, _) =>
         for {
           exName <- name(session)
           exKey  <- routingKey(session)
@@ -27,5 +26,5 @@ class AmqpPublisher(destination: AmqpExchange, components: AmqpComponents) exten
     }
   }
 
-  override protected val pool: AmqpConnectionPool = components.connectionPublishPool
+  override protected val pool: AmqpConnectionPool = ???
 }

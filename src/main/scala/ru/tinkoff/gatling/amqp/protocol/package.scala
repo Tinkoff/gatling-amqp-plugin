@@ -28,8 +28,8 @@ package object protocol {
   object CorrelationIdMessageMatcher extends AmqpMessageMatcher {
     override def prepareRequest(msg: AmqpProtocolMessage): AmqpProtocolMessage =
       msg.correlationId(FastUUID.toString(UUID.randomUUID))
-    override def requestMatchId(msg: AmqpProtocolMessage): String              = msg.correlationId
-    override def responseMatchId(msg: AmqpProtocolMessage): String             = msg.correlationId
+    override def requestMatchId(msg: AmqpProtocolMessage): String  = msg.correlationId
+    override def responseMatchId(msg: AmqpProtocolMessage): String = msg.correlationId
   }
 
   case class AmqpProtocolMessageMatcher(extractId: AmqpProtocolMessage => String) extends AmqpMessageMatcher {

@@ -1,10 +1,10 @@
 package ru.tinkoff.gatling.amqp.request
 
-import java.util.Date
-
 import com.softwaremill.quicklens._
 import io.gatling.core.action.builder.ActionBuilder
 import io.gatling.core.session.Expression
+
+import java.util.Date
 
 case class PublishDslBuilder(attributes: AmqpAttributes, factory: AmqpAttributes => ActionBuilder) {
   def messageId(value: Expression[String]): PublishDslBuilder =
@@ -46,8 +46,8 @@ case class PublishDslBuilder(attributes: AmqpAttributes, factory: AmqpAttributes
   def header(key: String, value: Expression[String]): PublishDslBuilder =
     this.modify(_.attributes.messageProperties.headers).using(_ + (key -> value))
 
-  def headers(hs: (String, Expression[String])*): PublishDslBuilder     =
+  def headers(hs: (String, Expression[String])*): PublishDslBuilder =
     hs.foldLeft(this) { case (rb, (k, v)) => rb.header(k, v) }
 
-  def build(): ActionBuilder                                            = factory(attributes)
+  def build(): ActionBuilder = factory(attributes)
 }

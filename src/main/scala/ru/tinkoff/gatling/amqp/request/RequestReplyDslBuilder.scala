@@ -47,10 +47,10 @@ case class RequestReplyDslBuilder(attributes: AmqpAttributes, factory: AmqpAttri
   def header(key: String, value: Expression[String]): RequestReplyDslBuilder =
     this.modify(_.attributes.messageProperties.headers).using(_ + (key -> value))
 
-  def headers(hs: (String, Expression[String])*): RequestReplyDslBuilder     =
+  def headers(hs: (String, Expression[String])*): RequestReplyDslBuilder =
     hs.foldLeft(this) { case (rb, (k, v)) => rb.header(k, v) }
 
-  def check(checks: AmqpCheck*): RequestReplyDslBuilder                      =
+  def check(checks: AmqpCheck*): RequestReplyDslBuilder =
     this.modify(_.attributes.checks).using(_ ::: checks.toList)
 
   def build(): ActionBuilder = factory(attributes)

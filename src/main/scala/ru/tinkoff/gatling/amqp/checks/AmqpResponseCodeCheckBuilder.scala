@@ -21,7 +21,7 @@ object AmqpResponseCodeCheckBuilder {
             actual.success
           else
             s"found $actualValue".failure
-        case _                 => Validator.FoundNothingFailure
+        case _ => Validator.FoundNothingFailure
       }
   }
 

@@ -47,31 +47,31 @@ trait AmqpCheckSupport {
   )(implicit materializer: CheckMaterializer[A, AmqpCheck, AmqpProtocolMessage, P]): AmqpCheck =
     findCheckBuilder.find.exists
 
-  implicit def amqpXPathMaterializer(implicit
-      configuration: GatlingConfiguration
-  ): AmqpCheckMaterializer[XPathCheckType, XdmNode] =
+  implicit def amqpXPathMaterializer(
+      implicit
+      configuration: GatlingConfiguration): AmqpCheckMaterializer[XPathCheckType, XdmNode] =
     AmqpCheckMaterializer.xpath(configuration)
 
-  implicit def amqpJsonPathMaterializer(implicit
+  implicit def amqpJsonPathMaterializer(
+      implicit
       jsonParsers: JsonParsers,
-      configuration: GatlingConfiguration
-  ): AmqpCheckMaterializer[JsonPathCheckType, JsonNode] =
+      configuration: GatlingConfiguration): AmqpCheckMaterializer[JsonPathCheckType, JsonNode] =
     AmqpCheckMaterializer.jsonPath(jsonParsers, configuration)
 
-  implicit def amqpJmesPathMaterializer(implicit
+  implicit def amqpJmesPathMaterializer(
+      implicit
       jsonParsers: JsonParsers,
-      configuration: GatlingConfiguration
-  ): AmqpCheckMaterializer[JmesPathCheckType, JsonNode] =
+      configuration: GatlingConfiguration): AmqpCheckMaterializer[JmesPathCheckType, JsonNode] =
     AmqpCheckMaterializer.jmesPath(jsonParsers, configuration)
 
-  implicit def amqpBodyStringMaterializer(implicit
-      configuration: GatlingConfiguration
-  ): AmqpCheckMaterializer[BodyStringCheckType, String] =
+  implicit def amqpBodyStringMaterializer(
+      implicit
+      configuration: GatlingConfiguration): AmqpCheckMaterializer[BodyStringCheckType, String] =
     AmqpCheckMaterializer.bodyString(configuration)
 
-  implicit def amqpSubstringMaterializer(implicit
-      configuration: GatlingConfiguration
-  ): AmqpCheckMaterializer[SubstringCheckType, String] =
+  implicit def amqpSubstringMaterializer(
+      implicit
+      configuration: GatlingConfiguration): AmqpCheckMaterializer[SubstringCheckType, String] =
     AmqpCheckMaterializer.substring(configuration)
 
   implicit def amqpBodyByteMaterializer: AmqpCheckMaterializer[BodyBytesCheckType, Array[Byte]] =
@@ -91,7 +91,7 @@ trait AmqpCheckSupport {
             preparedCache: JMap[Any, Any]
         ): Validation[CheckResult] =
           ConditionalCheck(typedCondition, thenCheck).check(response, session, preparedCache)
-      }
+    }
 
   implicit val amqpTypedConditionalCheckWrapper: TypedConditionalCheckWrapper[AmqpProtocolMessage, AmqpCheck] =
     (condition: (AmqpProtocolMessage, Session) => Validation[Boolean], thenCheck: AmqpCheck) =>

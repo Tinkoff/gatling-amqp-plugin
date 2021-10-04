@@ -1,11 +1,10 @@
 package ru.tinkoff.gatling.amqp.request
 
-import java.util.Date
-
 import com.rabbitmq.client.AMQP
 import io.gatling.commons.validation._
 import io.gatling.core.session.{Expression, Session}
 
+import java.util.Date
 import scala.jdk.CollectionConverters._
 
 case class AmqpMessageProperties(
@@ -61,8 +60,7 @@ object AmqpMessageProperties {
                 rh <- resolvedHeaders
               } yield rh + (key -> v)
           }
-          .map(h => b.headers(h.asJava))
-      )
+          .map(h => b.headers(h.asJava)))
       .map(_.build())
 
   }

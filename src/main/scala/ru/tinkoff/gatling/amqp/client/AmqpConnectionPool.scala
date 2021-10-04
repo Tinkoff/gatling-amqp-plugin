@@ -1,10 +1,10 @@
 package ru.tinkoff.gatling.amqp.client
 
-import java.util.concurrent.Executors
-
 import com.rabbitmq.client.{Channel, Connection, ConnectionFactory}
 import org.apache.commons.pool2.ObjectPool
 import org.apache.commons.pool2.impl.{GenericObjectPool, GenericObjectPoolConfig}
+
+import java.util.concurrent.Executors
 
 class AmqpConnectionPool(factory: ConnectionFactory, consumerThreadsCount: Int) {
 

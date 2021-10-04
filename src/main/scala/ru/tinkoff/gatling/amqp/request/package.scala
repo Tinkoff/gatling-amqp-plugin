@@ -1,10 +1,10 @@
 package ru.tinkoff.gatling.amqp
 
-import java.nio.charset.Charset
-
 import com.rabbitmq.client.MessageProperties
 import io.gatling.commons.validation.Validation
 import io.gatling.core.session.{Expression, Session}
+
+import java.nio.charset.Charset
 
 package object request {
 
@@ -26,7 +26,7 @@ package object request {
     override private[amqp] def amqpProtocolMessage(session: Session) =
       text(session).map(str => AmqpProtocolMessage(MessageProperties.MINIMAL_BASIC, str.getBytes(charset)))
   }
-  case class BytesAmqpMessage(bytes: Expression[Array[Byte]])            extends AmqpMessage {
+  case class BytesAmqpMessage(bytes: Expression[Array[Byte]]) extends AmqpMessage {
     override private[amqp] def amqpProtocolMessage(session: Session) =
       bytes(session).map(AmqpProtocolMessage(MessageProperties.MINIMAL_BASIC, _))
   }

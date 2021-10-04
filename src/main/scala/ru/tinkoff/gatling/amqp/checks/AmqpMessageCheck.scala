@@ -1,12 +1,12 @@
 package ru.tinkoff.gatling.amqp.checks
 
-import java.util.{Map => JMap}
-
 import io.gatling.commons.validation._
 import io.gatling.core.check.CheckResult
 import io.gatling.core.session.Session
 import ru.tinkoff.gatling.amqp.AmqpCheck
 import ru.tinkoff.gatling.amqp.request.AmqpProtocolMessage
+
+import java.util.{Map => JMap}
 
 object AmqpMessageCheck {
 

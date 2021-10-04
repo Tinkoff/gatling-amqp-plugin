@@ -17,12 +17,12 @@ class PublishExample extends Simulation {
         .port(5672)
         .username("guest")
         .password("guest")
-        .vhost("/")
+        .vhost("my_vhost")
     )
     .usePersistentDeliveryMode
     .declare(queue("test_q_in"))
 
-  val scn: ScenarioBuilder = scenario("AMQP test")
+  def scn(i: Int): ScenarioBuilder = scenario(s"AMQP test $i")
     .feed(idFeeder)
     .exec(
       amqp("publish to exchange").publish
@@ -33,7 +33,13 @@ class PublishExample extends Simulation {
     )
 
   setUp(
-    scn.inject(rampUsersPerSec(1) to 5 during (60 seconds), constantUsersPerSec(5) during (5 minutes))
+    scn(1).inject(rampUsersPerSec(1) to 5 during (60 seconds), constantUsersPerSec(5) during (1 minutes)),
+    scn(2).inject(rampUsersPerSec(1) to 5 during (60 seconds), constantUsersPerSec(5) during (1 minutes)),
+    scn(3).inject(rampUsersPerSec(1) to 5 during (60 seconds), constantUsersPerSec(5) during (1 minutes)),
+    scn(4).inject(rampUsersPerSec(1) to 5 during (60 seconds), constantUsersPerSec(5) during (1 minutes)),
+    scn(5).inject(rampUsersPerSec(1) to 5 during (60 seconds), constantUsersPerSec(5) during (1 minutes)),
+    scn(6).inject(rampUsersPerSec(1) to 5 during (60 seconds), constantUsersPerSec(5) during (1 minutes)),
+//    scn(8).inject(rampUsersPerSec(1) to 5 during (60 seconds), constantUsersPerSec(5) during (1 minutes)),
   ).protocols(amqpConf)
     .maxDuration(10 minutes)
 

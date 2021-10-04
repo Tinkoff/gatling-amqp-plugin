@@ -1,8 +1,5 @@
 package ru.tinkoff.gatling.amqp.checks
 
-import java.io.ByteArrayInputStream
-import java.nio.charset.Charset
-
 import com.fasterxml.jackson.databind.JsonNode
 import io.gatling.commons.validation._
 import io.gatling.core.check.Preparer
@@ -12,6 +9,8 @@ import io.gatling.core.json.JsonParsers
 import net.sf.saxon.s9api.XdmNode
 import ru.tinkoff.gatling.amqp.request.AmqpProtocolMessage
 
+import java.io.ByteArrayInputStream
+import java.nio.charset.Charset
 import scala.util.Try
 
 trait AmqpMessagePreparer[P] extends Preparer[AmqpProtocolMessage, P]
@@ -39,12 +38,12 @@ object AmqpMessagePreparer {
   ): Preparer[AmqpProtocolMessage, JsonNode] =
     msg =>
       messageCharset(configuration, msg)
-        .flatMap(bodyCharset =>
-          if (msg.payload.length > CharsParsingThreshold)
-            jsonParsers.safeParse(new ByteArrayInputStream(msg.payload), bodyCharset)
-          else
-            jsonParsers.safeParse(new String(msg.payload, bodyCharset))
-        )
+        .flatMap(
+          bodyCharset =>
+            if (msg.payload.length > CharsParsingThreshold)
+              jsonParsers.safeParse(new ByteArrayInputStream(msg.payload), bodyCharset)
+            else
+              jsonParsers.safeParse(new String(msg.payload, bodyCharset)))
 
   private val ErrorMapper = "Could not parse response into a DOM Document: " + _
 
@@ -52,6 +51,6 @@ object AmqpMessagePreparer {
     msg =>
       safely(ErrorMapper) {
         messageCharset(configuration, msg).map(cs => XmlParsers.parse(new ByteArrayInputStream(msg.payload), cs))
-      }
+    }
 
 }
