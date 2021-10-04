@@ -14,17 +14,14 @@ case class PublishBuilder(attributes: AmqpAttributes, configuration: GatlingConf
     protocolComponentsRegistry.components(AmqpProtocol.amqpProtocolKey)
 
   override def build(ctx: ScenarioContext, next: Action): Action = {
-    import ctx._
-    val amqpComponents = components(protocolComponentsRegistry)
-    val statsEngine    = coreComponents.statsEngine
+    val amqpComponents = components(ctx.protocolComponentsRegistry)
 
     new Publish(
       attributes,
       amqpComponents,
-      statsEngine,
-      coreComponents.clock,
-      next,
-      coreComponents.throttler
+      ctx.coreComponents,
+      ctx.coreComponents.throttler,
+      next
     )
   }
 }

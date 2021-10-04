@@ -18,18 +18,15 @@ case class RequestReplyBuilder(
     protocolComponentsRegistry.components(AmqpProtocol.amqpProtocolKey)
 
   override def build(ctx: ScenarioContext, next: Action): Action = {
-    import ctx._
-    val amqpComponents = components(protocolComponentsRegistry)
-    val statsEngine    = coreComponents.statsEngine
+    val amqpComponents = components(ctx.protocolComponentsRegistry)
 
     new RequestReply(
       attributes,
       replyDest,
       amqpComponents,
-      statsEngine,
-      coreComponents.clock,
+      ctx.coreComponents,
       next,
-      coreComponents.throttler
+      ctx.coreComponents.throttler
     )
 
   }

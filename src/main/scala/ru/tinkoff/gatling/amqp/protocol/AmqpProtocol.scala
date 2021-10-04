@@ -1,14 +1,14 @@
 package ru.tinkoff.gatling.amqp.protocol
 
-import com.rabbitmq.client.{Channel, ConnectionFactory}
+import com.rabbitmq.client.ConnectionFactory
 import io.gatling.core.CoreComponents
 import io.gatling.core.config.GatlingConfiguration
 import io.gatling.core.protocol.{Protocol, ProtocolKey}
-import ru.tinkoff.gatling.amqp.client.{AmqpConnectionPool, TrackerPool}
+import ru.tinkoff.gatling.amqp.client.{AMQPClient, TrackerPool}
 import ru.tinkoff.gatling.amqp.request.AmqpProtocolMessage
 
+import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicReference
-import scala.jdk.CollectionConverters._
 
 object AmqpProtocol {
   val amqpProtocolKey: ProtocolKey[AmqpProtocol, AmqpComponents] = new ProtocolKey[AmqpProtocol, AmqpComponents] {
@@ -17,67 +17,47 @@ object AmqpProtocol {
     override def defaultProtocolValue(configuration: GatlingConfiguration): AmqpProtocol =
       throw new IllegalStateException("Can't provide a default value for AmqpProtocol")
 
-    private val trackerPoolRef           = new AtomicReference[TrackerPool]()
-    private val connectionPublishPoolRef = new AtomicReference[AmqpConnectionPool]()
-    private val connectionReplyPoolRef   = new AtomicReference[AmqpConnectionPool]()
+    private val trackerPoolRef = new AtomicReference[TrackerPool]()
 
-    private def getOrCreateConnectionPublishPool(protocol: AmqpProtocol) = {
-      if (connectionPublishPoolRef.get() == null) {
-        connectionPublishPoolRef.lazySet(
-          new AmqpConnectionPool(protocol.connectionFactory, protocol.consumersThreadCount)
-        )
-      }
-      connectionPublishPoolRef.get()
-    }
-
-    private def getOrCreateConnectionReplyPool(protocol: AmqpProtocol) = {
-      if (connectionReplyPoolRef.get() == null) {
-        connectionReplyPoolRef.lazySet(
-          new AmqpConnectionPool(protocol.replyConnectionFactory, protocol.consumersThreadCount)
-        )
-      }
-      connectionReplyPoolRef.get()
-    }
-
-    private def getOrCreateTrackerPool(components: CoreComponents, pool: AmqpConnectionPool) = {
+    private def getOrCreateTrackerPool(components: CoreComponents, client: AMQPClient) = {
       if (trackerPoolRef.get() == null) {
         trackerPoolRef.lazySet(
           new TrackerPool(
-            pool,
+            client,
             components.actorSystem,
             components.statsEngine,
-            components.clock,
-            components.configuration
+            components.clock
           )
         )
       }
       trackerPoolRef.get()
     }
 
-    private def toJavaMap(map: Map[String, Any]): java.util.Map[String, Object] =
-      map.asJava.asInstanceOf[java.util.Map[String, Object]]
-
-    private def runInitAction(c: Channel): PartialFunction[AmqpChannelInitAction, Unit] = {
-      case ExchangeDeclare(e)        =>
-        c.exchangeDeclare(e.name, e.exchangeType, e.durable, e.autoDelete, toJavaMap(e.arguments))
-      case QueueDeclare(q)           =>
-        c.queueDeclare(q.name, q.durable, q.exclusive, q.autoDelete, toJavaMap(q.arguments))
-      case BindQueue(q, e, rk, args) =>
-        c.queueBind(q, e, rk, toJavaMap(args))
+    private def runInitAction(client: AMQPClient): PartialFunction[AmqpChannelInitAction, Unit] = {
+      case ExchangeDeclare(e) =>
+        client.exchangeDeclare(e)(_ => (), _ => ())
+      case QueueDeclare(q) =>
+        client.queueDeclare(q)(_ => (), _ => ())
+      case b: BindQueue =>
+        client.queueBind(b)(_ => (), _ => ())
 
     }
 
     override def newComponents(coreComponents: CoreComponents): AmqpProtocol => AmqpComponents =
       amqpProtocol => {
-        val requestPool = getOrCreateConnectionPublishPool(amqpProtocol)
-        coreComponents.actorSystem.registerOnTermination(requestPool.close())
-        val replyPool   = getOrCreateConnectionReplyPool(amqpProtocol)
-        coreComponents.actorSystem.registerOnTermination(replyPool.close())
+        val blockingPool = Executors.newFixedThreadPool(100)
 
-        amqpProtocol.initActions.foreach(runInitAction(requestPool.channel))
-        val trackerPool = getOrCreateTrackerPool(coreComponents, replyPool)
+        val client = AMQPClient.async(amqpProtocol.connectionFactory,
+                                      amqpProtocol.replyConnectionFactory,
+                                      blockingPool,
+                                      amqpProtocol.consumersThreadCount)
 
-        AmqpComponents(amqpProtocol, requestPool, replyPool, trackerPool)
+        amqpProtocol.initActions.foreach(runInitAction(client))
+        val trackerPool = getOrCreateTrackerPool(coreComponents, client)
+
+        coreComponents.actorSystem.registerOnTermination(client.close())
+
+        AmqpComponents(amqpProtocol, trackerPool, client)
       }
   }
 }

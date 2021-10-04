@@ -2,13 +2,12 @@ package ru.tinkoff.gatling.amqp.protocol
 
 import io.gatling.core.protocol.ProtocolComponents
 import io.gatling.core.session.Session
-import ru.tinkoff.gatling.amqp.client.{AmqpConnectionPool, TrackerPool}
+import ru.tinkoff.gatling.amqp.client.{AMQPClient, TrackerPool}
 
 case class AmqpComponents(
     protocol: AmqpProtocol,
-    connectionPublishPool: AmqpConnectionPool,
-    connectionReplyPool: AmqpConnectionPool,
-    trackerPool: TrackerPool
+    trackerPool: TrackerPool,
+    client: AMQPClient
 ) extends ProtocolComponents {
   override def onStart: Session => Session = Session.Identity
 
