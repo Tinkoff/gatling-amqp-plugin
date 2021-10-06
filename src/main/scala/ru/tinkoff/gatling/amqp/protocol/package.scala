@@ -1,6 +1,5 @@
 package ru.tinkoff.gatling.amqp
 
-import com.eatthepath.uuid.FastUUID
 import com.rabbitmq.client.BuiltinExchangeType
 import ru.tinkoff.gatling.amqp.request.AmqpProtocolMessage
 
@@ -27,7 +26,7 @@ package object protocol {
 
   object CorrelationIdMessageMatcher extends AmqpMessageMatcher {
     override def prepareRequest(msg: AmqpProtocolMessage): AmqpProtocolMessage =
-      msg.correlationId(FastUUID.toString(UUID.randomUUID))
+      msg.correlationId(UUID.randomUUID.toString)
     override def requestMatchId(msg: AmqpProtocolMessage): String  = msg.correlationId
     override def responseMatchId(msg: AmqpProtocolMessage): String = msg.correlationId
   }

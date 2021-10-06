@@ -1,6 +1,8 @@
 package ru.tinkoff.gatling.amqp.action
 
-import io.gatling.commons.stats.Status
+import com.rabbitmq.client.AMQP.Connection.Close
+import com.rabbitmq.client.{AlreadyClosedException, ShutdownSignalException}
+import io.gatling.commons.stats.{KO, Status}
 import io.gatling.commons.validation.{Validation, _}
 import io.gatling.core.CoreComponents
 import io.gatling.core.action.{Action, RequestAction}
@@ -9,6 +11,8 @@ import io.gatling.core.session.{Expression, Session}
 import io.gatling.core.util.NameGen
 import ru.tinkoff.gatling.amqp.protocol.AmqpComponents
 import ru.tinkoff.gatling.amqp.request._
+
+import java.io.IOException
 
 abstract class AmqpAction(
     attributes: AmqpAttributes,
@@ -56,6 +60,32 @@ abstract class AmqpAction(
                                            responseCode,
                                            message)
     next ! session.logGroupRequestTimings(sent, received)
+  }
+
+  private def replyCode(se: ShutdownSignalException) = se.getReason match {
+    case c:Close => c.getReplyCode.toString
+    case other => s"500-${other.protocolMethodId()}"
+  }
+
+  protected def handleException: PartialFunction[Throwable, (String, String)] = {
+    case ace: AlreadyClosedException =>
+      (ace.getMessage, replyCode(ace))
+    case e: IOException =>
+      if (e.getMessage == null) {
+        e.getCause match {
+          case se: ShutdownSignalException =>
+            (se.getMessage, replyCode(se))
+          case other =>
+            (other.getMessage, "500")
+        }
+      } else {
+        (e.getMessage, "500")
+      }
+
+    case other =>
+      (other.getMessage, "500")
+
+
   }
 
   override def sendRequest(requestName: String, session: Session): Validation[Unit] =

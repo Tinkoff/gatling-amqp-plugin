@@ -37,8 +37,10 @@ final class Publish(
           }
           executeNext(session, startTime, clock.nowMillis, OK, next, requestNameString, None, None)
         },
-        e =>
-          executeNext(session, startTime, clock.nowMillis, KO, next, requestNameString, Some("500"), Some(e.getMessage))
+        e => {
+          val (message, code) = handleException(e)
+          executeNext(session, startTime, clock.nowMillis, KO, next, requestNameString, Option(code), Option(message))
+        }
       )).onFailure { m =>
       coreComponents.statsEngine.logCrash(session.scenario, session.groups, requestNameString, m)
       executeNext(session, clock.nowMillis, clock.nowMillis, KO, next, requestNameString, Some("ERROR"), Some(m))
