@@ -2,6 +2,7 @@ package ru.tinkoff.gatling.amqp.client
 
 import com.rabbitmq.client.{Channel, Connection, ConnectionFactory}
 
+import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.{ArrayBlockingQueue, ExecutorService, Executors}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.jdk.CollectionConverters._
@@ -10,15 +11,18 @@ object ChannelsProvider {
 
   private abstract class BaseChannelProvider(blockingPool: ExecutorService) extends ChannelsProvider {
     protected implicit val ec: ExecutionContext = ExecutionContext.fromExecutor(blockingPool)
-    private val channelPoolCapacity             = 10
+    private val channelPoolCapacity             = Runtime.getRuntime.availableProcessors()
     private val channels                        = new ArrayBlockingQueue[Channel](channelPoolCapacity)
+    private val created                         = new AtomicInteger(0)
 
     override def channel: Future[Channel] =
       for {
         c <- connection
-        ch <- if (channels.size() < channelPoolCapacity)
-               Future(c.createChannel())
-             else
+        ch <- if (created.get() < channelPoolCapacity)
+               Future(c.createChannel()).map { channel =>
+                 created.getAndIncrement()
+                 channel
+               } else
                Future(channels.take())
       } yield ch
 

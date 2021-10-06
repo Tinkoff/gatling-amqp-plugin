@@ -1,5 +1,9 @@
 package ru.tinkoff.gatling.amqp.client
 
+import akka.actor.ActorSystem
+import akka.stream.Materializer
+import akka.stream.alpakka.amqp._
+import akka.stream.alpakka.amqp.scaladsl.AmqpSource
 import com.rabbitmq.client.AMQP.{Exchange, Queue}
 import com.rabbitmq.client.{CancelCallback, ConnectionFactory, DeliverCallback, Delivery}
 import ru.tinkoff.gatling.amqp.protocol.{AmqpExchange, AmqpQueue, BindQueue}
@@ -24,34 +28,41 @@ object AMQPClient {
                                       blockingPool: ExecutorService,
                                       consumersThreadCount: Int,
   ) extends AMQPClient {
-    private implicit val ec: ExecutionContext = ExecutionContext.fromExecutor(blockingPool)
-    private val publisherProvider             = ChannelsProvider.publisherProvider(publisherFactory, blockingPool)
-    private val consumerProvider =
-      ChannelsProvider.consumerProvider(consumerFactory, blockingPool, consumersThreadCount)
+    private implicit val ec: ExecutionContext       = ExecutionContext.fromExecutor(blockingPool)
+    private val system                              = ActorSystem("consumers", defaultExecutionContext = Some(ec))
+    private implicit val materializer: Materializer = Materializer(system)
+    private val publisherProvider                   = ChannelsProvider.publisherProvider(publisherFactory, blockingPool)
+
+    private val consumerProvider = AmqpCachedConnectionProvider(
+      AmqpConnectionFactoryConnectionProvider(consumerFactory))
 
     private def withCompletion[T, U](fut: Future[T])(s: T => U, f: Throwable => U): Unit = fut.onComplete {
       case Success(value)     => s(value)
       case Failure(exception) => f(exception)
     }
 
-    override def basicPublish(name: String, routingKey: String, msg: AmqpProtocolMessage)(f: Unit => Unit,
-                                                                                          e: Throwable => Unit): Unit =
+    override def basicPublish(name: String, routingKey: String, msg: AmqpProtocolMessage)(
+        f: Unit => Unit,
+        e: Throwable => Unit): Unit = {
+
       withCompletion(
         for {
           ch <- publisherProvider.channel
-          _  <- Future(ch.basicPublish(name, routingKey, msg.amqpProperties, msg.payload))
+          r  <- Future(ch.basicPublish(name, routingKey, msg.amqpProperties, msg.payload))
           _  <- publisherProvider.releaseChannel(ch)
-        } yield ()
+        } yield r
       )(f, e)
 
-    override def consumeWith(sourceQueue: String)(f: AmqpProtocolMessage => Unit, e: Throwable => Unit): Unit =
+    }
+
+    override def consumeWith(sourceQueue: String)(f: AmqpProtocolMessage => Unit, e: Throwable => Unit): Unit = {
+      val responsesSource =
+        AmqpSource.atMostOnceSource(NamedQueueSourceSettings(consumerProvider, sourceQueue).withAckRequired(false),
+                                    consumersThreadCount)
       withCompletion(
-        for {
-          ch <- consumerProvider.channel
-          _  <- Future(ch.basicConsume(sourceQueue, true, deliverCallback(f), defaultCancelCallback))
-          _  <- publisherProvider.releaseChannel(ch)
-        } yield ()
+        responsesSource.map(r => AmqpProtocolMessage(r.properties, r.bytes.toArray)).map(f).run()
       )(identity, e)
+    }
 
     override def exchangeDeclare(ex: AmqpExchange)(f: Exchange.DeclareOk => Unit, e: Throwable => Unit): Unit =
       withCompletion(
@@ -101,11 +112,11 @@ object AMQPClient {
       withCompletion(
         for {
           _ <- publisherProvider.closeAll
-          _ <- consumerProvider.closeAll
           _ <- Future {
                 blockingPool.shutdown()
                 blockingPool.awaitTermination(60, TimeUnit.SECONDS)
               }
+          _ <- system.terminate()
         } yield ()
       )(identity, _ => ())
     }

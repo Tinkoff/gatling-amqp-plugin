@@ -45,7 +45,7 @@ object AmqpProtocol {
 
     override def newComponents(coreComponents: CoreComponents): AmqpProtocol => AmqpComponents =
       amqpProtocol => {
-        val blockingPool = Executors.newFixedThreadPool(100)
+        val blockingPool = Executors.newCachedThreadPool()
 
         val client = AMQPClient.async(amqpProtocol.connectionFactory,
                                       amqpProtocol.replyConnectionFactory,
