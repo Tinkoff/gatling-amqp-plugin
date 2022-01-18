@@ -15,7 +15,7 @@ class AmqpMessageTracker(actor: ActorRef) {
       checks: List[AmqpCheck],
       session: Session,
       next: Action,
-      requestName: String
+      requestName: String,
   ): Unit =
     actor ! MessagePublished(
       matchId,
@@ -24,6 +24,6 @@ class AmqpMessageTracker(actor: ActorRef) {
       checks,
       session,
       next,
-      requestName
+      requestName,
     )
 }

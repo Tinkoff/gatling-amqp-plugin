@@ -12,7 +12,7 @@ import ru.tinkoff.gatling.amqp.request.{AmqpAttributes, AmqpMessageProperties, A
 abstract class AmqpAction(
     attributes: AmqpAttributes,
     components: AmqpComponents,
-    throttler: Option[Throttler]
+    throttler: Option[Throttler],
 ) extends RequestAction with AmqpLogging with NameGen {
   override val requestName: Expression[String] = attributes.requestName
 
@@ -22,19 +22,20 @@ abstract class AmqpAction(
     for {
       props             <- AmqpMessageProperties.toBasicProperties(attributes.messageProperties, session)
       propsWithDelivery <- props.builder().deliveryMode(components.protocol.deliveryMode.mode).build().success
-      message <- attributes.message
-                  .amqpProtocolMessage(session)
-                  .map(_.copy(amqpProperties = propsWithDelivery))
-                  .map(components.protocol.messageMatcher.prepareRequest)
-    } yield
-      throttler
-        .fold(publishAndLogMessage(requestName, message, session))(
-          _.throttle(session.scenario, () => publishAndLogMessage(requestName, message, session))
-        )
+      message           <- attributes.message
+                             .amqpProtocolMessage(session)
+                             .map(_.copy(amqpProperties = propsWithDelivery))
+                             .map(components.protocol.messageMatcher.prepareRequest)
+    } yield throttler
+      .fold(publishAndLogMessage(requestName, message, session))(
+        _.throttle(session.scenario, () => publishAndLogMessage(requestName, message, session)),
+      )
 
-  protected def publishAndLogMessage(requestNameString: String,
-                                     msg: AmqpProtocolMessage,
-                                     session: Session,
-                                     publisher: AmqpPublisher = publisher): Unit
+  protected def publishAndLogMessage(
+      requestNameString: String,
+      msg: AmqpProtocolMessage,
+      session: Session,
+      publisher: AmqpPublisher = publisher,
+  ): Unit
 
 }

@@ -18,7 +18,7 @@ class RequestReply(
     val statsEngine: StatsEngine,
     val clock: Clock,
     val next: Action,
-    throttler: Option[Throttler]
+    throttler: Option[Throttler],
 ) extends AmqpAction(attributes, components, throttler) {
 
   private val replyTimeout = components.protocol.replyTimeout.getOrElse(0L)
@@ -32,19 +32,21 @@ class RequestReply(
       case AmqpTopicExchange(name, _, _)  => name(session)
     }
 
-  override protected def publishAndLogMessage(requestNameString: String,
-                                              msg: AmqpProtocolMessage,
-                                              session: Session,
-                                              publisher: AmqpPublisher): Unit =
+  override protected def publishAndLogMessage(
+      requestNameString: String,
+      msg: AmqpProtocolMessage,
+      session: Session,
+      publisher: AmqpPublisher,
+  ): Unit =
     resolveDestination(replyDestination, session).map { qName =>
       val tracker = components.trackerPool.tracker(
         qName,
         components.protocol.consumersThreadCount,
         components.protocol.messageMatcher,
-        components.protocol.responseTransformer
+        components.protocol.responseTransformer,
       )
-      val id  = components.protocol.messageMatcher.requestMatchId(msg)
-      val now = clock.nowMillis
+      val id      = components.protocol.messageMatcher.requestMatchId(msg)
+      val now     = clock.nowMillis
       try {
         publisher.publish(msg, session)
         if (logger.underlying.isDebugEnabled) {
@@ -54,14 +56,16 @@ class RequestReply(
       } catch {
         case e: Throwable =>
           logger.error(e.getMessage, e)
-          statsEngine.logResponse(session.scenario,
-                                  session.groups,
-                                  requestNameString,
-                                  now,
-                                  clock.nowMillis,
-                                  KO,
-                                  Some("500"),
-                                  Some(e.getMessage))
+          statsEngine.logResponse(
+            session.scenario,
+            session.groups,
+            requestNameString,
+            now,
+            clock.nowMillis,
+            KO,
+            Some("500"),
+            Some(e.getMessage),
+          )
       }
     }
 }

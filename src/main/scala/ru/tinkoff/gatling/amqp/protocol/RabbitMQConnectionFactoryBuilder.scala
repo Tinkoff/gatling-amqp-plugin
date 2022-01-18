@@ -7,7 +7,7 @@ case class RabbitMQConnectionFactoryBuilder(
     port: Option[Int] = None,
     username: Option[String] = None,
     password: Option[String] = None,
-    virtualHost: Option[String] = None
+    virtualHost: Option[String] = None,
 ) {
 
   def username(rabbitUsername: String): RabbitMQConnectionFactoryBuilder =

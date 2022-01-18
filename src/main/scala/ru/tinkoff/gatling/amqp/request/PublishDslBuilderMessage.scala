@@ -9,7 +9,7 @@ import java.nio.charset.Charset
 case class PublishDslBuilderMessage(
     requestName: Expression[String],
     destination: AmqpExchange,
-    configuration: GatlingConfiguration
+    configuration: GatlingConfiguration,
 ) {
 
   def textMessage(text: Expression[String], charset: Charset = configuration.core.charset): PublishDslBuilder =
@@ -20,7 +20,7 @@ case class PublishDslBuilderMessage(
   private def message(mess: AmqpMessage) =
     PublishDslBuilder(
       AmqpAttributes(requestName, destination, None, mess),
-      PublishBuilder(_, configuration)
+      PublishBuilder(_, configuration),
     )
 
 }

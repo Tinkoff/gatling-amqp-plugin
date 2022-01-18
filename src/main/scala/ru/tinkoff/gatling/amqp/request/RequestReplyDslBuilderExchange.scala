@@ -20,6 +20,6 @@ case class RequestReplyDslBuilderExchange(requestName: Expression[String], confi
       AmqpQueueExchange(""),
       setReplyTo = false,
       None,
-      configuration
+      configuration,
     )
 }

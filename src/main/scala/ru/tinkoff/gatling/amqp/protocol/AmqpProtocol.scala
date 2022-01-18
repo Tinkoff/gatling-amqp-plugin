@@ -24,7 +24,7 @@ object AmqpProtocol {
     private def getOrCreateConnectionPublishPool(protocol: AmqpProtocol) = {
       if (connectionPublishPoolRef.get() == null) {
         connectionPublishPoolRef.lazySet(
-          new AmqpConnectionPool(protocol.connectionFactory, protocol.consumersThreadCount)
+          new AmqpConnectionPool(protocol.connectionFactory, protocol.consumersThreadCount),
         )
       }
       connectionPublishPoolRef.get()
@@ -33,7 +33,7 @@ object AmqpProtocol {
     private def getOrCreateConnectionReplyPool(protocol: AmqpProtocol) = {
       if (connectionReplyPoolRef.get() == null) {
         connectionReplyPoolRef.lazySet(
-          new AmqpConnectionPool(protocol.replyConnectionFactory, protocol.consumersThreadCount)
+          new AmqpConnectionPool(protocol.replyConnectionFactory, protocol.consumersThreadCount),
         )
       }
       connectionReplyPoolRef.get()
@@ -47,8 +47,8 @@ object AmqpProtocol {
             components.actorSystem,
             components.statsEngine,
             components.clock,
-            components.configuration
-          )
+            components.configuration,
+          ),
         )
       }
       trackerPoolRef.get()
@@ -90,7 +90,7 @@ case class AmqpProtocol(
     consumersThreadCount: Int,
     messageMatcher: AmqpMessageMatcher,
     responseTransformer: Option[AmqpProtocolMessage => AmqpProtocolMessage],
-    initActions: AmqpChannelInitActions
+    initActions: AmqpChannelInitActions,
 ) extends Protocol {
   type Components = AmqpComponents
 }

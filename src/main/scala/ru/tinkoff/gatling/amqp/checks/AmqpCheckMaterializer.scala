@@ -17,7 +17,7 @@ import ru.tinkoff.gatling.amqp.checks.AmqpResponseCodeCheckBuilder.AmqpMessageCh
 import ru.tinkoff.gatling.amqp.request.AmqpProtocolMessage
 
 final class AmqpCheckMaterializer[T, P] private[AmqpCheckMaterializer] (
-    override val preparer: Preparer[AmqpProtocolMessage, P]
+    override val preparer: Preparer[AmqpProtocolMessage, P],
 ) extends CheckMaterializer[T, AmqpCheck, AmqpProtocolMessage, P](identity)
 
 object AmqpCheckMaterializer {
@@ -35,13 +35,13 @@ object AmqpCheckMaterializer {
 
   def jsonPath(
       jsonParsers: JsonParsers,
-      configuration: GatlingConfiguration
+      configuration: GatlingConfiguration,
   ): AmqpCheckMaterializer[JsonPathCheckType, JsonNode] =
     new AmqpCheckMaterializer(AmqpMessagePreparer.jsonPathPreparer(jsonParsers, configuration))
 
   def jmesPath(
       jsonParsers: JsonParsers,
-      configuration: GatlingConfiguration
+      configuration: GatlingConfiguration,
   ): AmqpCheckMaterializer[JmesPathCheckType, JsonNode] =
     new AmqpCheckMaterializer(AmqpMessagePreparer.jsonPathPreparer(jsonParsers, configuration))
 

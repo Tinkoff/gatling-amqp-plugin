@@ -17,7 +17,7 @@ class TrackerPool(
     system: ActorSystem,
     statsEngine: StatsEngine,
     clock: Clock,
-    configuration: GatlingConfiguration
+    configuration: GatlingConfiguration,
 ) extends AmqpLogging with NameGen {
 
   private val trackers = new ConcurrentHashMap[String, AmqpMessageTracker]
@@ -26,7 +26,7 @@ class TrackerPool(
       sourceQueue: String,
       listenerThreadCount: Int,
       messageMatcher: AmqpMessageMatcher,
-      responseTransformer: Option[AmqpProtocolMessage => AmqpProtocolMessage]
+      responseTransformer: Option[AmqpProtocolMessage => AmqpProtocolMessage],
   ): AmqpMessageTracker =
     trackers.computeIfAbsent(
       sourceQueue,
@@ -45,19 +45,19 @@ class TrackerPool(
               val replyId           = messageMatcher.responseMatchId(amqpMessage)
               logMessage(
                 s"Message received AmqpMessageID=${message.getProperties.getMessageId} matchId=$replyId",
-                amqpMessage
+                amqpMessage,
               )
               actor ! MessageConsumed(
                 replyId,
                 receivedTimestamp,
-                responseTransformer.map(_(amqpMessage)).getOrElse(amqpMessage)
+                responseTransformer.map(_(amqpMessage)).getOrElse(amqpMessage),
               )
             },
-            (_: String) => ()
+            (_: String) => (),
           )
         }
 
         new AmqpMessageTracker(actor)
-      }
+      },
     )
 }

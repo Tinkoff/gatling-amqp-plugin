@@ -11,12 +11,11 @@ import ru.tinkoff.gatling.amqp.protocol.AmqpProtocolBuilder
 import scala.Console.println
 import scala.concurrent.duration._
 
-/**
-  * Execute this test.
-  * - start docker-compose for the `docker-compose.yaml` - docker-compose -f docker-compose.yml up
+/** Execute this test.
+  *   - start docker-compose for the `docker-compose.yaml` - docker-compose -f docker-compose.yml up
   * -- open http://localhost:15672 (gatling publishes messages here), user: guest, password: guest
   * -- open http://localhost:15673 (consumer writes messages here), user: guest, password: guest
-  * - run RequestReplyGatlingRunner from IDE - it will
+  *   - run RequestReplyGatlingRunner from IDE - it will
   * -- start the messageConsumer SimpleRabbitMQClient
   * -- gatling publish messages to readQueue, simpleClient reads them
   * -- gatling receives messages from writeQueue, simple client has them written
@@ -47,7 +46,7 @@ class RequestReplyTwoBrokerExample extends Simulation {
         .port(5673)
         .username("guest")
         .password("guest")
-        .vhost("/")
+        .vhost("/"),
     )
     .replyTimeout(60000)
     .consumerThreadsCount(8)
@@ -67,12 +66,12 @@ class RequestReplyTwoBrokerExample extends Simulation {
         .headers("test" -> "performance", "extra-test" -> "34-${id}")
         .check(
           bodyString.exists,
-          bodyString.is("Message processed")
-        )
+          bodyString.is("Message processed"),
+        ),
     )
 
   setUp(
-    scn.inject(rampUsersPerSec(1) to 5 during (60 seconds), constantUsersPerSec(5) during (2 minutes))
+    scn.inject(rampUsersPerSec(1) to 5 during (60 seconds), constantUsersPerSec(5) during (2 minutes)),
   ).protocols(amqpConf)
     .maxDuration(10 minutes)
 }

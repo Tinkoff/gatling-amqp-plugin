@@ -22,7 +22,7 @@ case class AmqpMessageProperties(
     `type`: Option[Expression[String]] = None,
     userId: Option[Expression[String]] = None,
     appId: Option[Expression[String]] = None,
-    clusterId: Option[Expression[String]] = None
+    clusterId: Option[Expression[String]] = None,
 )
 
 object AmqpMessageProperties {
@@ -31,7 +31,7 @@ object AmqpMessageProperties {
     def apply(
         session: Session,
         p: AMQP.BasicProperties.Builder,
-        setProperty: T => AMQP.BasicProperties.Builder
+        setProperty: T => AMQP.BasicProperties.Builder,
     ): Validation[AMQP.BasicProperties.Builder] =
       optExp.fold(p.success)(_(session).map(setProperty))
   }
@@ -54,14 +54,13 @@ object AmqpMessageProperties {
     clusterId(s, bp, bp.clusterId)
       .flatMap(b =>
         headers
-          .foldLeft(Map.empty[String, AnyRef].success) {
-            case (resolvedHeaders, (key, value)) =>
-              for {
-                v  <- value(s)
-                rh <- resolvedHeaders
-              } yield rh + (key -> v)
+          .foldLeft(Map.empty[String, AnyRef].success) { case (resolvedHeaders, (key, value)) =>
+            for {
+              v  <- value(s)
+              rh <- resolvedHeaders
+            } yield rh + (key -> v)
           }
-          .map(h => b.headers(h.asJava))
+          .map(h => b.headers(h.asJava)),
       )
       .map(_.build())
 

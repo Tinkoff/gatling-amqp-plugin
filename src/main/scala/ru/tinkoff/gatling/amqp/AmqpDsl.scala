@@ -24,7 +24,7 @@ trait AmqpDsl extends AmqpCheckSupport {
       durable: Boolean = true,
       exclusive: Boolean = false,
       autoDelete: Boolean = true,
-      arguments: Map[String, Any] = Map.empty
+      arguments: Map[String, Any] = Map.empty,
   ): AmqpQueue =
     AmqpQueue(name, durable, exclusive, autoDelete, arguments)
 
@@ -33,7 +33,7 @@ trait AmqpDsl extends AmqpCheckSupport {
       exchangeType: BuiltinExchangeType,
       durable: Boolean = true,
       autoDelete: Boolean = true,
-      arguments: Map[String, Any] = Map.empty
+      arguments: Map[String, Any] = Map.empty,
   ): AmqpExchange =
     AmqpExchange(name, exchangeType, durable, autoDelete, arguments)
 

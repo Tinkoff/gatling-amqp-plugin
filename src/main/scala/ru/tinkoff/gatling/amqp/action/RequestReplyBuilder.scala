@@ -12,7 +12,7 @@ case class RequestReplyBuilder(
     attributes: AmqpAttributes,
     replyDest: AmqpExchange,
     setReplyTo: Boolean,
-    configuration: GatlingConfiguration
+    configuration: GatlingConfiguration,
 ) extends ActionBuilder {
   private def components(protocolComponentsRegistry: ProtocolComponentsRegistry): AmqpComponents =
     protocolComponentsRegistry.components(AmqpProtocol.amqpProtocolKey)
@@ -29,7 +29,7 @@ case class RequestReplyBuilder(
       statsEngine,
       coreComponents.clock,
       next,
-      coreComponents.throttler
+      coreComponents.throttler,
     )
 
   }

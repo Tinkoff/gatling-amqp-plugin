@@ -9,5 +9,5 @@ case class AmqpAttributes(
     selector: Option[String],
     message: AmqpMessage,
     messageProperties: AmqpMessageProperties = AmqpMessageProperties(),
-    checks: List[AmqpCheck] = Nil
+    checks: List[AmqpCheck] = Nil,
 )
