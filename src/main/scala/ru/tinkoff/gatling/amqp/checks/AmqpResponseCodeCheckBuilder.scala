@@ -26,9 +26,9 @@ object AmqpResponseCodeCheckBuilder {
   }
 
   class ExtendedDefaultFindCheckBuilder[T, P, X](ext: Expression[Extractor[P, X]], displayActualValue: Boolean)
-      extends DefaultFindCheckBuilder[T, P, X](ext, displayActualValue) {
+      extends CheckBuilder.Find.Default[T, P, X](ext, displayActualValue) {
     def notIn(expected: Expression[Seq[X]]): CheckBuilder[T, P, X] =
-      new DefaultCheckBuilder[T, P, X](this.ext, expected.map(new NotInMatcher(_)), displayActualValue, None, None)
+      new CheckBuilder.Final[T, P, X](this.ext, expected.map(new NotInMatcher(_)), displayActualValue, None, None)
 
     def notIn(expected: X*): CheckBuilder[T, P, X] = notIn(expected.expressionSuccess)
   }

@@ -1,13 +1,13 @@
 import sbt._
 
 object Dependencies {
-  val gatlingVersion = "3.5.1"
+  val gatlingVersion = "3.7.3"
 
   lazy val gatlingCore: Seq[ModuleID] = Seq("io.gatling" % "gatling-core" % gatlingVersion % Provided)
 
   lazy val gatling: Seq[ModuleID] = Seq(
     "io.gatling.highcharts" % "gatling-charts-highcharts",
-    "io.gatling"            % "gatling-test-framework"
+    "io.gatling"            % "gatling-test-framework",
   ).map(_ % gatlingVersion % Test)
 
   lazy val rabbitmq    = "com.rabbitmq"       % "amqp-client"   % "5.11.0"
