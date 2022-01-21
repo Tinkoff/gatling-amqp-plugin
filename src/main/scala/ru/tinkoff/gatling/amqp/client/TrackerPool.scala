@@ -45,7 +45,7 @@ class TrackerPool(
               val amqpMessage       = AmqpProtocolMessage(message.getProperties, message.getBody)
               val replyId           = messageMatcher.responseMatchId(amqpMessage)
               logMessage(
-                s"Message received AmqpMessageID=#{message.getProperties.getMessageId} matchId=$replyId",
+                s"Message received AmqpMessageID=${message.getProperties.getMessageId} matchId=$replyId",
                 amqpMessage,
               )
               actor ! MessageConsumed(
