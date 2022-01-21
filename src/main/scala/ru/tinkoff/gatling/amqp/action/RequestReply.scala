@@ -50,7 +50,7 @@ class RequestReply(
       try {
         publisher.publish(msg, session)
         if (logger.underlying.isDebugEnabled) {
-          logMessage(s"Message sent user=#{session.userId} AMQPMessageID=#{msg.messageId}", msg)
+          logMessage(s"Message sent user=${session.userId} AMQPMessageID=${msg.messageId}", msg)
         }
         tracker.track(id, clock.nowMillis, replyTimeout, attributes.checks, session, next, requestNameString)
       } catch {
