@@ -14,12 +14,14 @@ abstract class AmqpAction(
     components: AmqpComponents,
     throttler: Option[Throttler],
 ) extends RequestAction with AmqpLogging with NameGen {
+
   override val requestName: Expression[String] = attributes.requestName
 
   private val publisher = new AmqpPublisher(attributes.destination, components)
 
-  override def sendRequest(requestName: String, session: Session): Validation[Unit] =
+  override def sendRequest(session: Session): Validation[Unit] =
     for {
+      reqName           <- requestName(session)
       props             <- AmqpMessageProperties.toBasicProperties(attributes.messageProperties, session)
       propsWithDelivery <- props.builder().deliveryMode(components.protocol.deliveryMode.mode).build().success
       message           <- attributes.message
@@ -27,8 +29,8 @@ abstract class AmqpAction(
                              .map(_.copy(amqpProperties = propsWithDelivery))
                              .map(components.protocol.messageMatcher.prepareRequest)
     } yield throttler
-      .fold(publishAndLogMessage(requestName, message, session))(
-        _.throttle(session.scenario, () => publishAndLogMessage(requestName, message, session)),
+      .fold(publishAndLogMessage(reqName, message, session))(
+        _.throttle(session.scenario, () => publishAndLogMessage(reqName, message, session)),
       )
 
   protected def publishAndLogMessage(

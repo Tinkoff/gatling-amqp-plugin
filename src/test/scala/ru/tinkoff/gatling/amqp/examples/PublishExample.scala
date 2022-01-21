@@ -27,8 +27,8 @@ class PublishExample extends Simulation {
     .exec(
       amqp("publish to exchange").publish
         .queueExchange("test_q_in")
-        .textMessage("Hello message - ${id}")
-        .messageId("${id}")
+        .textMessage("Hello message - #{id}")
+        .messageId("#{id}")
         .priority(0),
     )
 

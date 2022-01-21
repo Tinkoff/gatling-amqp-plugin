@@ -8,7 +8,7 @@ import ru.tinkoff.gatling.amqp.request.AmqpProtocolMessage
 
 object AmqpResponseCodeCheckBuilder {
 
-  private type AmqpCheckMaterializer[T, S] = CheckMaterializer[T, AmqpCheck, AmqpProtocolMessage, S]
+  private type AmqpCheckMaterializer[T, P] = CheckMaterializer[T, AmqpCheck, AmqpProtocolMessage, P]
 
   class NotInMatcher[A](expected: Seq[A]) extends Matcher[A] {
 
@@ -25,12 +25,13 @@ object AmqpResponseCodeCheckBuilder {
       }
   }
 
-  class ExtendedDefaultFindCheckBuilder[T, P, X](ext: Expression[Extractor[P, X]], displayActualValue: Boolean)
-      extends CheckBuilder.Find.Default[T, P, X](ext, displayActualValue) {
-    def notIn(expected: Expression[Seq[X]]): CheckBuilder[T, P, X] =
-      new CheckBuilder.Final[T, P, X](this.ext, expected.map(new NotInMatcher(_)), displayActualValue, None, None)
+  class ExtendedDefaultFindCheckBuilder[T, P, X](extractor: Expression[Extractor[P, X]], displayActualValue: Boolean)
+      extends CheckBuilder.Find.Default[T, P, X](extractor, displayActualValue) {
 
-    def notIn(expected: X*): CheckBuilder[T, P, X] = notIn(expected.expressionSuccess)
+    def notIn(expected: Expression[Seq[X]]): CheckBuilder[T, P] =
+      new CheckBuilder.Final.Default[T, P, X](extractor, expected.map(new NotInMatcher(_)), displayActualValue, None, None)
+
+    def notIn(expected: X*): CheckBuilder[T, P] = notIn(expected.expressionSuccess)
   }
 
   trait AmqpMessageCheckType

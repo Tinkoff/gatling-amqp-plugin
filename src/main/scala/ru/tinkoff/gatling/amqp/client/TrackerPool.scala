@@ -1,6 +1,5 @@
 package ru.tinkoff.gatling.amqp.client
 
-import java.util.concurrent.ConcurrentHashMap
 import akka.actor.ActorSystem
 import com.rabbitmq.client.Delivery
 import io.gatling.commons.util.Clock
@@ -11,6 +10,8 @@ import ru.tinkoff.gatling.amqp.action.AmqpLogging
 import ru.tinkoff.gatling.amqp.client.AmqpMessageTrackerActor.MessageConsumed
 import ru.tinkoff.gatling.amqp.protocol.AmqpMessageMatcher
 import ru.tinkoff.gatling.amqp.request.AmqpProtocolMessage
+
+import java.util.concurrent.ConcurrentHashMap
 
 class TrackerPool(
     pool: AmqpConnectionPool,
@@ -44,7 +45,7 @@ class TrackerPool(
               val amqpMessage       = AmqpProtocolMessage(message.getProperties, message.getBody)
               val replyId           = messageMatcher.responseMatchId(amqpMessage)
               logMessage(
-                s"Message received AmqpMessageID=${message.getProperties.getMessageId} matchId=$replyId",
+                s"Message received AmqpMessageID=#{message.getProperties.getMessageId} matchId=$replyId",
                 amqpMessage,
               )
               actor ! MessageConsumed(

@@ -1,8 +1,6 @@
 package ru.tinkoff.gatling.amqp.checks
 
 import com.fasterxml.jackson.databind.JsonNode
-import io.gatling.commons.validation._
-import io.gatling.core.Predef.Session
 import io.gatling.core.check._
 import io.gatling.core.check.bytes.BodyBytesCheckType
 import io.gatling.core.check.jmespath.JmesPathCheckType
@@ -12,7 +10,6 @@ import io.gatling.core.check.substring.SubstringCheckType
 import io.gatling.core.check.xpath.XPathCheckType
 import io.gatling.core.config.GatlingConfiguration
 import io.gatling.core.json.JsonParsers
-import io.gatling.core.session.Expression
 import net.sf.saxon.s9api.XdmNode
 import ru.tinkoff.gatling.amqp.AmqpCheck
 import ru.tinkoff.gatling.amqp.checks.AmqpResponseCodeCheckBuilder.{
@@ -22,7 +19,6 @@ import ru.tinkoff.gatling.amqp.checks.AmqpResponseCodeCheckBuilder.{
 }
 import ru.tinkoff.gatling.amqp.request.AmqpProtocolMessage
 
-import java.util.{Map => JMap}
 import scala.annotation.implicitNotFound
 
 trait AmqpCheckSupport {
@@ -30,22 +26,22 @@ trait AmqpCheckSupport {
   val responseCode: ExtendedDefaultFindCheckBuilder[AmqpMessageCheckType, AmqpProtocolMessage, String] = ResponseCode
 
   @implicitNotFound("Could not find a CheckMaterializer. This check might not be valid for AMQP.")
-  implicit def checkBuilder2AmqpCheck[A, P, X](
-      checkBuilder: CheckBuilder[A, P, X],
-  )(implicit materializer: CheckMaterializer[A, AmqpCheck, AmqpProtocolMessage, P]): AmqpCheck =
+  implicit def checkBuilder2AmqpCheck[T, P](
+      checkBuilder: CheckBuilder[T, P],
+  )(implicit materializer: CheckMaterializer[T, AmqpCheck, AmqpProtocolMessage, P]): AmqpCheck =
     checkBuilder.build(materializer)
 
   @implicitNotFound("Could not find a CheckMaterializer. This check might not be valid for AMQP.")
-  implicit def validatorCheckBuilder2AmqpCheck[A, P, X](
-      validatorCheckBuilder: CheckBuilder.Final.Default[A, P, X],
-  )(implicit materializer: CheckMaterializer[A, AmqpCheck, AmqpProtocolMessage, P]): AmqpCheck =
-    validatorCheckBuilder.exists
+  implicit def validatorCheckBuilder2AmqpCheck[T, P, X](
+      validate: CheckBuilder.Validate[T, P, X],
+  )(implicit materializer: CheckMaterializer[T, AmqpCheck, AmqpProtocolMessage, P]): AmqpCheck =
+    validate.exists
 
   @implicitNotFound("Could not find a CheckMaterializer. This check might not be valid for AMQP.")
-  implicit def findCheckBuilder2AmqpCheck[A, P, X](
-      findCheckBuilder: FindCheckBuilder[A, P, X],
-  )(implicit materializer: CheckMaterializer[A, AmqpCheck, AmqpProtocolMessage, P]): AmqpCheck =
-    findCheckBuilder.find.exists
+  implicit def findCheckBuilder2AmqpCheck[T, P, X](
+      find: CheckBuilder.Find[T, P, X],
+  )(implicit materializer: CheckMaterializer[T, AmqpCheck, AmqpProtocolMessage, P]): AmqpCheck =
+    find.find.exists
 
   implicit def amqpXPathMaterializer(implicit
       configuration: GatlingConfiguration,
@@ -80,21 +76,7 @@ trait AmqpCheckSupport {
   implicit val amqpStatusCheckMaterializer: AmqpCheckMaterializer[AmqpMessageCheckType, AmqpProtocolMessage] =
     AmqpCheckMaterializer.amqpStatusCheck
 
-  implicit val amqpUntypedConditionalCheckWrapper: UntypedConditionalCheckWrapper[AmqpCheck] =
-    (condition: Expression[Boolean], thenCheck: AmqpCheck) =>
-      new Check[AmqpProtocolMessage] {
-        private val typedCondition = (_: AmqpProtocolMessage, ses: Session) => condition(ses)
+  implicit val amqpUntypedConditionalCheckWrapper: UntypedCheckIfMaker[AmqpCheck] = _.checkIf(_)
 
-        override def check(
-            response: AmqpProtocolMessage,
-            session: Session,
-            preparedCache: JMap[Any, Any],
-        ): Validation[CheckResult] =
-          ConditionalCheck(typedCondition, thenCheck).check(response, session, preparedCache)
-      }
-
-  implicit val amqpTypedConditionalCheckWrapper: TypedConditionalCheckWrapper[AmqpProtocolMessage, AmqpCheck] =
-    (condition: (AmqpProtocolMessage, Session) => Validation[Boolean], thenCheck: AmqpCheck) =>
-      (response: AmqpProtocolMessage, session: Session, preparedCache: JMap[Any, Any]) =>
-        ConditionalCheck(condition, thenCheck).check(response, session, preparedCache)
+  implicit val amqpTypedConditionalCheckWrapper: TypedCheckIfMaker[AmqpProtocolMessage, AmqpCheck] = _.checkIf(_)
 }

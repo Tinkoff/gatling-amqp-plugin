@@ -1,11 +1,11 @@
 package ru.tinkoff.gatling.amqp.client
 
-import akka.actor.{Props, Timers}
+import akka.actor.{Actor, Props, Timers}
+import com.typesafe.scalalogging.LazyLogging
 import io.gatling.commons.stats.{KO, OK, Status}
 import io.gatling.commons.util.Clock
 import io.gatling.commons.validation.Failure
 import io.gatling.core.action.Action
-import io.gatling.core.akka.BaseActor
 import io.gatling.core.check.Check
 import io.gatling.core.session.Session
 import io.gatling.core.stats.StatsEngine
@@ -40,7 +40,7 @@ object AmqpMessageTrackerActor {
   case object TimeoutScan
 }
 
-class AmqpMessageTrackerActor(statsEngine: StatsEngine, clock: Clock) extends BaseActor with Timers {
+class AmqpMessageTrackerActor(statsEngine: StatsEngine, clock: Clock) extends Actor with Timers with LazyLogging {
 
   def triggerPeriodicTimeoutScan(
       periodicTimeoutScanTriggered: Boolean,

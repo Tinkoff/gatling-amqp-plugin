@@ -32,7 +32,7 @@ class Publish(
     try {
       publisher.publish(msg, session)
       if (logger.underlying.isDebugEnabled) {
-        logMessage(s"Message sent user=${session.userId} AMQPMessageID=${msg.messageId}", msg)
+        logMessage(s"Message sent user=#{session.userId} AMQPMessageID=#{msg.messageId}", msg)
       }
       statsEngine.logResponse(session.scenario, session.groups, requestNameString, now, clock.nowMillis, OK, None, None)
     } catch {

@@ -59,11 +59,11 @@ class RequestReplyTwoBrokerExample extends Simulation {
       amqp("Request Reply exchange test").requestReply
         .queueExchange("readQueue")
         .replyExchange("writeQueue")
-        .textMessage("""{"msg": "Hello message - ${id}"}""")
-        .messageId("${id}")
+        .textMessage("""{"msg": "Hello message - #{id}"}""")
+        .messageId("#{id}")
         .priority(0)
         .contentType("application/json")
-        .headers("test" -> "performance", "extra-test" -> "34-${id}")
+        .headers("test" -> "performance", "extra-test" -> "34-#{id}")
         .check(
           bodyString.exists,
           bodyString.is("Message processed"),
