@@ -46,6 +46,7 @@ class RequestReplyExample extends Simulation {
         .check(
           bodyString.exists,
           bodyString.is("Message processed"),
+          simpleCheck(_.messageId.contains("Some"))
         ),
     )
 

@@ -1,7 +1,9 @@
 package ru.tinkoff.gatling.amqp.checks
 
 import com.fasterxml.jackson.databind.JsonNode
-import io.gatling.core.check._
+import io.gatling.commons.validation._
+import io.gatling.core.check.Check.PreparedCache
+import io.gatling.core.check.{CheckResult, _}
 import io.gatling.core.check.bytes.BodyBytesCheckType
 import io.gatling.core.check.jmespath.JmesPathCheckType
 import io.gatling.core.check.jsonpath.JsonPathCheckType
@@ -10,6 +12,7 @@ import io.gatling.core.check.substring.SubstringCheckType
 import io.gatling.core.check.xpath.XPathCheckType
 import io.gatling.core.config.GatlingConfiguration
 import io.gatling.core.json.JsonParsers
+import io.gatling.core.session.Session
 import net.sf.saxon.s9api.XdmNode
 import ru.tinkoff.gatling.amqp.AmqpCheck
 import ru.tinkoff.gatling.amqp.checks.AmqpResponseCodeCheckBuilder.{
@@ -24,6 +27,17 @@ import scala.annotation.implicitNotFound
 trait AmqpCheckSupport {
   def messageCheck: AmqpMessageCheck.type                                                              = AmqpMessageCheck
   val responseCode: ExtendedDefaultFindCheckBuilder[AmqpMessageCheckType, AmqpProtocolMessage, String] = ResponseCode
+
+  def simpleCheck(f: AmqpProtocolMessage => Boolean): AmqpCheck =
+    Check.Simple(
+      (response: AmqpProtocolMessage, _: Session, _: PreparedCache) =>
+        if (f(response)) {
+          CheckResult.NoopCheckResultSuccess
+        } else {
+          "AMQP check failed".failure
+        },
+      None,
+    )
 
   @implicitNotFound("Could not find a CheckMaterializer. This check might not be valid for AMQP.")
   implicit def checkBuilder2AmqpCheck[T, P](
