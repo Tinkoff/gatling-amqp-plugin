@@ -8,7 +8,7 @@ case class AmqpComponents(
     protocol: AmqpProtocol,
     connectionPublishPool: AmqpConnectionPool,
     connectionReplyPool: AmqpConnectionPool,
-    trackerPool: TrackerPool
+    trackerPool: TrackerPool,
 ) extends ProtocolComponents {
   override def onStart: Session => Session = Session.Identity
 

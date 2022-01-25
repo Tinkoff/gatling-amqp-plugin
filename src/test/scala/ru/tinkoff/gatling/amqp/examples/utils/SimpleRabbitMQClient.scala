@@ -4,8 +4,7 @@ import com.rabbitmq.client._
 
 import java.nio.charset.StandardCharsets
 
-/**
-  * Simple RabbitMQClient which consumes messages from one broker and write them to other broker.
+/** Simple RabbitMQClient which consumes messages from one broker and write them to other broker.
   */
 object SimpleRabbitMQClient {
   private val readQueue   = "readQueue"

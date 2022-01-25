@@ -1,11 +1,11 @@
 package ru.tinkoff.gatling.amqp.client
 
-import akka.actor.{Props, Timers}
+import akka.actor.{Actor, Props, Timers}
+import com.typesafe.scalalogging.LazyLogging
 import io.gatling.commons.stats.{KO, OK, Status}
 import io.gatling.commons.util.Clock
 import io.gatling.commons.validation.Failure
 import io.gatling.core.action.Action
-import io.gatling.core.akka.BaseActor
 import io.gatling.core.check.Check
 import io.gatling.core.session.Session
 import io.gatling.core.stats.StatsEngine
@@ -28,32 +28,36 @@ object AmqpMessageTrackerActor {
       checks: List[AmqpCheck],
       session: Session,
       next: Action,
-      requestName: String
+      requestName: String,
   )
 
   case class MessageConsumed(
       matchId: String,
       received: Long,
-      message: AmqpProtocolMessage
+      message: AmqpProtocolMessage,
   )
 
   case object TimeoutScan
 }
 
-class AmqpMessageTrackerActor(statsEngine: StatsEngine, clock: Clock) extends BaseActor with Timers {
+class AmqpMessageTrackerActor(statsEngine: StatsEngine, clock: Clock) extends Actor with Timers with LazyLogging {
 
-  def triggerPeriodicTimeoutScan(periodicTimeoutScanTriggered: Boolean,
-                                 sentMessages: mutable.HashMap[String, MessagePublished],
-                                 timedOutMessages: mutable.ArrayBuffer[MessagePublished]): Unit =
+  def triggerPeriodicTimeoutScan(
+      periodicTimeoutScanTriggered: Boolean,
+      sentMessages: mutable.HashMap[String, MessagePublished],
+      timedOutMessages: mutable.ArrayBuffer[MessagePublished],
+  ): Unit =
     if (!periodicTimeoutScanTriggered) {
       context.become(onMessage(periodicTimeoutScanTriggered = true, sentMessages, timedOutMessages))
       timers.startTimerWithFixedDelay("timeoutTimer", TimeoutScan, 1000 millis)
     }
 
   override def receive: Receive =
-    onMessage(periodicTimeoutScanTriggered = false,
-              mutable.HashMap.empty[String, MessagePublished],
-              mutable.ArrayBuffer.empty[MessagePublished])
+    onMessage(
+      periodicTimeoutScanTriggered = false,
+      mutable.HashMap.empty[String, MessagePublished],
+      mutable.ArrayBuffer.empty[MessagePublished],
+    )
 
   private def executeNext(
       session: Session,
@@ -63,7 +67,7 @@ class AmqpMessageTrackerActor(statsEngine: StatsEngine, clock: Clock) extends Ba
       next: Action,
       requestName: String,
       responseCode: Option[String],
-      message: Option[String]
+      message: Option[String],
   ): Unit = {
     statsEngine.logResponse(
       session.scenario,
@@ -73,13 +77,12 @@ class AmqpMessageTrackerActor(statsEngine: StatsEngine, clock: Clock) extends Ba
       received,
       status,
       responseCode,
-      message
+      message,
     )
     next ! session.logGroupRequestTimings(sent, received)
   }
 
-  /**
-    * Processes a matched message
+  /** Processes a matched message
     */
   private def processMessage(
       session: Session,
@@ -88,7 +91,7 @@ class AmqpMessageTrackerActor(statsEngine: StatsEngine, clock: Clock) extends Ba
       checks: List[AmqpCheck],
       message: AmqpProtocolMessage,
       next: Action,
-      requestName: String
+      requestName: String,
   ): Unit = {
     val (newSession, error) = Check.check(message, session, checks)
     error match {
@@ -101,16 +104,18 @@ class AmqpMessageTrackerActor(statsEngine: StatsEngine, clock: Clock) extends Ba
           next,
           requestName,
           message.responseCode,
-          Some(errorMessage)
+          Some(errorMessage),
         )
-      case _ =>
+      case _                           =>
         executeNext(newSession, sent, received, OK, next, requestName, message.responseCode, message.responseCode)
     }
   }
 
-  private def onMessage(periodicTimeoutScanTriggered: Boolean,
-                        sentMessages: mutable.HashMap[String, MessagePublished],
-                        timedOutMessages: mutable.ArrayBuffer[MessagePublished]): Receive = {
+  private def onMessage(
+      periodicTimeoutScanTriggered: Boolean,
+      sentMessages: mutable.HashMap[String, MessagePublished],
+      timedOutMessages: mutable.ArrayBuffer[MessagePublished],
+  ): Receive = {
     // message was sent; add the timestamps to the map
     case messageSent: MessagePublished =>
       sentMessages += messageSent.matchId -> messageSent
@@ -121,9 +126,8 @@ class AmqpMessageTrackerActor(statsEngine: StatsEngine, clock: Clock) extends Ba
     // message was received; publish stats and remove from the map
     case MessageConsumed(matchId, received, message) =>
       // if key is missing, message was already acked and is a dup, or request timeout
-      sentMessages.remove(matchId).foreach {
-        case MessagePublished(_, sent, _, checks, session, next, requestName) =>
-          processMessage(session, sent, received, checks, message, next, requestName)
+      sentMessages.remove(matchId).foreach { case MessagePublished(_, sent, _, checks, session, next, requestName) =>
+        processMessage(session, sent, received, checks, message, next, requestName)
       }
 
     case TimeoutScan =>
@@ -145,7 +149,7 @@ class AmqpMessageTrackerActor(statsEngine: StatsEngine, clock: Clock) extends Ba
           next,
           requestName,
           None,
-          Some(s"Reply timeout after $receivedTimeout ms")
+          Some(s"Reply timeout after $receivedTimeout ms"),
         )
       }
       timedOutMessages.clear()

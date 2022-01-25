@@ -40,8 +40,7 @@ package object protocol {
   case object RabbitMQConnectionFactoryBuilderBase {
     def host(host: String): RabbitMQConnectionFactoryBuilder = RabbitMQConnectionFactoryBuilder(host = Some(host))
 
-    /**
-      * Builder with default connection factory settings
+    /** Builder with default connection factory settings
       */
     def default: RabbitMQConnectionFactoryBuilder = RabbitMQConnectionFactoryBuilder()
   }
@@ -60,7 +59,7 @@ package object protocol {
       exchangeType: BuiltinExchangeType,
       durable: Boolean,
       autoDelete: Boolean,
-      arguments: Map[String, Any]
+      arguments: Map[String, Any],
   )
 
   final case class AmqpQueue(
@@ -68,6 +67,6 @@ package object protocol {
       durable: Boolean,
       exclusive: Boolean,
       autoDelete: Boolean,
-      arguments: Map[String, Any]
+      arguments: Map[String, Any],
   )
 }

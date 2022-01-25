@@ -1,6 +1,5 @@
 package ru.tinkoff.gatling.amqp.client
 
-import java.util.concurrent.ConcurrentHashMap
 import akka.actor.ActorSystem
 import com.rabbitmq.client.Delivery
 import io.gatling.commons.util.Clock
@@ -12,12 +11,14 @@ import ru.tinkoff.gatling.amqp.client.AmqpMessageTrackerActor.MessageConsumed
 import ru.tinkoff.gatling.amqp.protocol.AmqpMessageMatcher
 import ru.tinkoff.gatling.amqp.request.AmqpProtocolMessage
 
+import java.util.concurrent.ConcurrentHashMap
+
 class TrackerPool(
     pool: AmqpConnectionPool,
     system: ActorSystem,
     statsEngine: StatsEngine,
     clock: Clock,
-    configuration: GatlingConfiguration
+    configuration: GatlingConfiguration,
 ) extends AmqpLogging with NameGen {
 
   private val trackers = new ConcurrentHashMap[String, AmqpMessageTracker]
@@ -26,7 +27,7 @@ class TrackerPool(
       sourceQueue: String,
       listenerThreadCount: Int,
       messageMatcher: AmqpMessageMatcher,
-      responseTransformer: Option[AmqpProtocolMessage => AmqpProtocolMessage]
+      responseTransformer: Option[AmqpProtocolMessage => AmqpProtocolMessage],
   ): AmqpMessageTracker =
     trackers.computeIfAbsent(
       sourceQueue,
@@ -45,19 +46,19 @@ class TrackerPool(
               val replyId           = messageMatcher.responseMatchId(amqpMessage)
               logMessage(
                 s"Message received AmqpMessageID=${message.getProperties.getMessageId} matchId=$replyId",
-                amqpMessage
+                amqpMessage,
               )
               actor ! MessageConsumed(
                 replyId,
                 receivedTimestamp,
-                responseTransformer.map(_(amqpMessage)).getOrElse(amqpMessage)
+                responseTransformer.map(_(amqpMessage)).getOrElse(amqpMessage),
               )
             },
-            (_: String) => ()
+            (_: String) => (),
           )
         }
 
         new AmqpMessageTracker(actor)
-      }
+      },
     )
 }

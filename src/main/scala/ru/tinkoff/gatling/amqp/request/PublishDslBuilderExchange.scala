@@ -5,7 +5,7 @@ import io.gatling.core.session.Expression
 
 case class PublishDslBuilderExchange(
     requestName: Expression[String],
-    configuration: GatlingConfiguration
+    configuration: GatlingConfiguration,
 ) {
   def topicExchange(name: Expression[String], routingKey: Expression[String]): PublishDslBuilderMessage =
     destination(AmqpTopicExchange(name, routingKey = routingKey))

@@ -35,7 +35,7 @@ object AmqpMessagePreparer {
 
   def jsonPathPreparer(
       jsonParsers: JsonParsers,
-      configuration: GatlingConfiguration
+      configuration: GatlingConfiguration,
   ): Preparer[AmqpProtocolMessage, JsonNode] =
     msg =>
       messageCharset(configuration, msg)
@@ -43,7 +43,7 @@ object AmqpMessagePreparer {
           if (msg.payload.length > CharsParsingThreshold)
             jsonParsers.safeParse(new ByteArrayInputStream(msg.payload), bodyCharset)
           else
-            jsonParsers.safeParse(new String(msg.payload, bodyCharset))
+            jsonParsers.safeParse(new String(msg.payload, bodyCharset)),
         )
 
   private val ErrorMapper = "Could not parse response into a DOM Document: " + _

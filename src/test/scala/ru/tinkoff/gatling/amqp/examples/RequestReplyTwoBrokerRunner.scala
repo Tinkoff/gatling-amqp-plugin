@@ -3,11 +3,8 @@ package ru.tinkoff.gatling.amqp.examples
 import io.gatling.app.Gatling
 import io.gatling.core.config.GatlingPropertiesBuilder
 
-/**
-  * This object simply provides a `main` method that wraps
-  * [[io.gatling.app.Gatling]].main, which
-  * allows us to do some configuration and setup before
-  * Gatling launches.
+/** This object simply provides a `main` method that wraps [[io.gatling.app.Gatling]].main, which allows us to do some
+  * configuration and setup before Gatling launches.
   */
 object RequestReplyTwoBrokerRunner {
 

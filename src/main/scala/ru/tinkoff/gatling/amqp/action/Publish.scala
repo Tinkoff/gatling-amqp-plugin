@@ -16,16 +16,18 @@ class Publish(
     val statsEngine: StatsEngine,
     val clock: Clock,
     val next: Action,
-    throttler: Option[Throttler]
+    throttler: Option[Throttler],
 ) extends AmqpAction(attributes, components, throttler) {
   override val name: String = genName("amqpPublish")
 
   override val requestName: Expression[String] = attributes.requestName
 
-  override protected def publishAndLogMessage(requestNameString: String,
-                                              msg: AmqpProtocolMessage,
-                                              session: Session,
-                                              publisher: AmqpPublisher): Unit = {
+  override protected def publishAndLogMessage(
+      requestNameString: String,
+      msg: AmqpProtocolMessage,
+      session: Session,
+      publisher: AmqpPublisher,
+  ): Unit = {
     val now = clock.nowMillis
     try {
       publisher.publish(msg, session)
@@ -36,14 +38,16 @@ class Publish(
     } catch {
       case e: Throwable =>
         logger.error(e.getMessage, e)
-        statsEngine.logResponse(session.scenario,
-                                session.groups,
-                                requestNameString,
-                                now,
-                                clock.nowMillis,
-                                KO,
-                                Some("500"),
-                                Some(e.getMessage))
+        statsEngine.logResponse(
+          session.scenario,
+          session.groups,
+          requestNameString,
+          now,
+          clock.nowMillis,
+          KO,
+          Some("500"),
+          Some(e.getMessage),
+        )
     }
     next ! session
   }

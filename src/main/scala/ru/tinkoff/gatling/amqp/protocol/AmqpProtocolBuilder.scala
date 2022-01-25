@@ -11,7 +11,7 @@ case class AmqpProtocolBuilder(
     consumerThreadsCount: Int = 1,
     replyTimeout: Option[Long] = None,
     responseTransformer: Option[AmqpProtocolMessage => AmqpProtocolMessage] = None,
-    initActions: AmqpChannelInitActions = Nil
+    initActions: AmqpChannelInitActions = Nil,
 ) {
 
   def usePersistentDeliveryMode: AmqpProtocolBuilder    = copy(deliveryMode = Persistent())
@@ -42,7 +42,7 @@ case class AmqpProtocolBuilder(
       q: AmqpQueue,
       e: AmqpExchange,
       routingKey: String,
-      args: Map[String, Any] = Map.empty
+      args: Map[String, Any] = Map.empty,
   ): AmqpProtocolBuilder =
     this.copy(initActions = this.initActions :+ BindQueue(q.name, e.name, routingKey, args))
 
@@ -55,6 +55,6 @@ case class AmqpProtocolBuilder(
       consumerThreadsCount,
       messageMatcher,
       responseTransformer,
-      initActions
+      initActions,
     )
 }

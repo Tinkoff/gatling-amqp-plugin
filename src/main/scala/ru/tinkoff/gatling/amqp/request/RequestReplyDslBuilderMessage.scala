@@ -12,11 +12,10 @@ case class RequestReplyDslBuilderMessage(
     replyDest: AmqpExchange,
     setReplyTo: Boolean,
     messageSelector: Option[String],
-    configuration: GatlingConfiguration
+    configuration: GatlingConfiguration,
 ) {
 
-  /**
-    * Add a reply queue
+  /** Add a reply queue
     */
   def replyExchange(name: Expression[String]): RequestReplyDslBuilderMessage = replyDestination(AmqpQueueExchange(name))
   private def replyDestination(destination: AmqpExchange)                    = this.copy(replyDest = destination)
@@ -30,6 +29,6 @@ case class RequestReplyDslBuilderMessage(
   private def message(mess: AmqpMessage) =
     RequestReplyDslBuilder(
       AmqpAttributes(requestName, destination, messageSelector, mess),
-      RequestReplyBuilder(_, replyDest, setReplyTo, configuration)
+      RequestReplyBuilder(_, replyDest, setReplyTo, configuration),
     )
 }

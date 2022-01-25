@@ -26,7 +26,7 @@ class AmqpConnectionPool(factory: ConnectionFactory, consumerThreadsCount: Int) 
     }
   }
 
-  def channel: Channel = {
+  def channel: Channel                 = {
     channelPool.borrowObject()
   }
   def returnChannel(ch: Channel): Unit = channelPool.returnObject(ch)
