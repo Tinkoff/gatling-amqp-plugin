@@ -117,7 +117,7 @@ class AmqpMessageTrackerActor(statsEngine: StatsEngine, clock: Clock) extends Ac
       timedOutMessages: mutable.ArrayBuffer[MessagePublished],
   ): Receive = {
     // message was sent; add the timestamps to the map
-    case messageSent: MessagePublished =>
+    case messageSent: MessagePublished               =>
       sentMessages += messageSent.matchId -> messageSent
       if (messageSent.replyTimeout > 0) {
         triggerPeriodicTimeoutScan(periodicTimeoutScanTriggered, sentMessages, timedOutMessages)
