@@ -10,7 +10,7 @@ object Dependencies {
     "io.gatling"            % "gatling-test-framework",
   ).map(_ % gatlingVersion % Test)
 
-  lazy val rabbitmq    = "com.rabbitmq"       % "amqp-client"   % "5.15.0"
+  lazy val rabbitmq    = "com.rabbitmq"       % "amqp-client"   % "5.16.0"
   lazy val commonsPool = "org.apache.commons" % "commons-pool2" % "2.11.1"
   lazy val fastUUID    = "com.eatthepath"     % "fast-uuid"     % "0.2.0"
 
