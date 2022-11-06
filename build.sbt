@@ -4,7 +4,7 @@ lazy val root = (project in file("."))
   .enablePlugins(GitVersioning)
   .settings(
     name         := "gatling-amqp-plugin",
-    scalaVersion := "2.13.8",
+    scalaVersion := "2.13.10",
     libraryDependencies ++= gatling ++ gatlingCore,
     libraryDependencies ++= Seq(rabbitmq, commonsPool, fastUUID),
     scalacOptions ++= Seq(
