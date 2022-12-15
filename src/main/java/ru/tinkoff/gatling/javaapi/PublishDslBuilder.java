@@ -19,8 +19,8 @@ public class PublishDslBuilder implements ActionBuilder {
         return this;
     }
 
-    public PublishDslBuilder priority(String value) {
-        this.wrapped = wrapped.priority(toIntExpression(value));
+    public PublishDslBuilder priority(Integer value) {
+        this.wrapped = wrapped.priority(toIntExpression(value.toString()));
         return this;
     }
 

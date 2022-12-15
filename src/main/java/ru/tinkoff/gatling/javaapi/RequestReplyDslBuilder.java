@@ -22,8 +22,8 @@ public class RequestReplyDslBuilder implements ActionBuilder {
         return this;
     }
 
-    public RequestReplyDslBuilder priority(String value) {
-        this.wrapped = wrapped.priority(toIntExpression(value));
+    public RequestReplyDslBuilder priority(Integer value) {
+        this.wrapped = wrapped.priority(toIntExpression(value.toString()));
         return this;
     }
 
