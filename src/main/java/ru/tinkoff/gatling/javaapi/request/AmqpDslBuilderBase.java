@@ -1,4 +1,4 @@
-package ru.tinkoff.gatling.javaapi;
+package ru.tinkoff.gatling.javaapi.request;
 
 public final class AmqpDslBuilderBase {
     private final ru.tinkoff.gatling.amqp.request.AmqpDslBuilderBase wrapped;

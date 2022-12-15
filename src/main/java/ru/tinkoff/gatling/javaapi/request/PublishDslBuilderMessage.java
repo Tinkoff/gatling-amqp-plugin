@@ -1,4 +1,4 @@
-package ru.tinkoff.gatling.javaapi;
+package ru.tinkoff.gatling.javaapi.request;
 
 import java.nio.charset.Charset;
 import static io.gatling.javaapi.core.internal.Expressions.*;
