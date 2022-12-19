@@ -8,7 +8,6 @@ import java.util.Arrays;
 import java.util.Map;
 
 import static io.gatling.javaapi.core.internal.Expressions.*;
-import static io.gatling.javaapi.core.internal.Expressions.toStringExpression;
 
 public class RequestReplyDslBuilder implements ActionBuilder {
     private ru.tinkoff.gatling.amqp.request.RequestReplyDslBuilder wrapped;
