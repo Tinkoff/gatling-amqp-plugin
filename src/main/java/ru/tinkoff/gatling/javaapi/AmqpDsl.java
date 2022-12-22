@@ -8,7 +8,7 @@ import ru.tinkoff.gatling.javaapi.request.AmqpDslBuilderBase;
 public final class AmqpDsl {
 
     public static AmqpProtocolBuilderBase amqp(){
-        return new AmqpProtocolBuilderBase(ru.tinkoff.gatling.amqp.Predef.amqp(io.gatling.core.Predef.configuration()));
+        return new AmqpProtocolBuilderBase();
     }
     public static AmqpDslBuilderBase amqp(String requestName){
         return new AmqpDslBuilderBase(ru.tinkoff.gatling.amqp.Predef.amqp(toStringExpression(requestName)));
