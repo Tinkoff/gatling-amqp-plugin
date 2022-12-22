@@ -1,10 +1,8 @@
 package ru.tinkoff.gatling.javaapi.request;
 
 import io.gatling.javaapi.core.ActionBuilder;
-import io.gatling.javaapi.core.CheckBuilder;
+import ru.tinkoff.gatling.javaapi.check.AmqpChecks;
 import scala.Tuple2;
-
-import ru.tinkoff.gatling.javaapi.checks.AmqpChecks;
 
 import java.util.Arrays;
 import java.util.List;
@@ -95,10 +93,10 @@ public class RequestReplyDslBuilder implements ActionBuilder {
         return this;
     }
 
-    public RequestReplyDslBuilder check(CheckBuilder... checks) {
+    public RequestReplyDslBuilder check(Object... checks) {
         return check(Arrays.asList(checks));
     }
-    public RequestReplyDslBuilder check(List<CheckBuilder> checks) {
+    public RequestReplyDslBuilder check(List<Object> checks) {
         this.wrapped = wrapped.check(AmqpChecks.toScalaChecks(checks));
         return this;
     }

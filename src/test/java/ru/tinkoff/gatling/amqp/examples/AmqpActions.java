@@ -1,9 +1,11 @@
 package ru.tinkoff.gatling.amqp.examples;
 
+import static io.gatling.javaapi.core.CoreDsl.*;
 import static ru.tinkoff.gatling.javaapi.AmqpDsl.*;
 
 import ru.tinkoff.gatling.javaapi.request.PublishDslBuilder;
 import ru.tinkoff.gatling.javaapi.request.RequestReplyDslBuilder;
+
 
 public class AmqpActions {
     public static PublishDslBuilder action =
@@ -19,5 +21,10 @@ public class AmqpActions {
             .queueExchange("test_queue_hw")
             .replyExchange("test_queue_hw")
             .textMessage("Hello message - #{messageId}")
-            .messageId("1234");
+            .messageId("1234")
+            .check(
+                    bodyBytes().exists(),
+                    simpleCheck((x)-> x.payload().length > 0),
+                    responseCode().notIn("123","234")
+                    );
 }
