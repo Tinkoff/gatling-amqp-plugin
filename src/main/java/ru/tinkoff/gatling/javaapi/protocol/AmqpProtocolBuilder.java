@@ -2,7 +2,6 @@ package ru.tinkoff.gatling.javaapi.protocol;
 
 import io.gatling.core.protocol.Protocol;
 import io.gatling.javaapi.core.ProtocolBuilder;
-import ru.tinkoff.gatling.amqp.protocol.AmqpProtocol;
 import ru.tinkoff.gatling.amqp.request.AmqpProtocolMessage;
 import static scala.jdk.javaapi.CollectionConverters.asScala;
 import scala.Function1;
@@ -10,6 +9,7 @@ import scala.Function1;
 import java.util.Map;
 
 public class AmqpProtocolBuilder implements ProtocolBuilder{
+    public AmqpProtocolBuilder usePersistentDeliveryMode;
     private ru.tinkoff.gatling.amqp.protocol.AmqpProtocolBuilder wrapped;
 
     public AmqpProtocolBuilder(ru.tinkoff.gatling.amqp.protocol.AmqpProtocolBuilder wrapped) {
