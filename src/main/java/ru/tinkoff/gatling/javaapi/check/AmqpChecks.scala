@@ -25,27 +25,27 @@ object AmqpChecks {
         val checkBuilder = javaCheck.asInstanceOf[io.gatling.javaapi.core.CheckBuilder]
         val scalaCheck   = checkBuilder.asScala
         checkBuilder.`type` match {
-          case CoreCheckType.BodyBytes                   =>
+          case CoreCheckType.BodyBytes    =>
             scalaCheck.asInstanceOf[CheckBuilder[BodyBytesCheckType, Array[Byte]]].build(AmqpCheckMaterializer.bodyBytes)
-          case CoreCheckType.BodyString                  =>
+          case CoreCheckType.BodyString   =>
             scalaCheck
               .asInstanceOf[CheckBuilder[BodyStringCheckType, String]]
               .build(AmqpCheckMaterializer.bodyString(io.gatling.core.Predef.configuration))
-          case CoreCheckType.Substring                   =>
+          case CoreCheckType.Substring    =>
             scalaCheck
               .asInstanceOf[CheckBuilder[SubstringCheckType, String]]
               .build(AmqpCheckMaterializer.substring(io.gatling.core.Predef.configuration))
-          case CoreCheckType.XPath                       =>
+          case CoreCheckType.XPath        =>
             scalaCheck
               .asInstanceOf[CheckBuilder[XPathCheckType, XdmNode]]
               .build(AmqpCheckMaterializer.xpath(io.gatling.core.Predef.configuration))
-          case CoreCheckType.JsonPath                    =>
+          case CoreCheckType.JsonPath     =>
             scalaCheck
               .asInstanceOf[CheckBuilder[JsonPathCheckType, JsonNode]]
               .build(
                 AmqpCheckMaterializer.jsonPath(io.gatling.core.Predef.defaultJsonParsers, io.gatling.core.Predef.configuration),
               )
-          case CoreCheckType.JmesPath                    =>
+          case CoreCheckType.JmesPath     =>
             scalaCheck
               .asInstanceOf[CheckBuilder[JmesPathCheckType, JsonNode]]
               .build(
@@ -57,15 +57,16 @@ object AmqpChecks {
               .build(
                 AmqpCheckMaterializer.amqpStatusCheck,
               )
-          case unknown                                   => throw new IllegalArgumentException(s"1) AMQP DSL doesn't support $unknown")
+          case unknown                    => throw new IllegalArgumentException(s"AMQP DSL doesn't support $unknown")
         }
-      case x: AmqpCheck                            => x
-      case x                                       => throw new IllegalArgumentException(s"2) AMQP DSL doesn't support $x")
+      case amqpCheck: AmqpCheck                    => amqpCheck
+      case unknown                                 => throw new IllegalArgumentException(s"AMQP DSL doesn't support $unknown")
     }
   }
 
   def toScalaChecks(javaChecks: ju.List[Object]): Seq[AmqpCheck] =
     javaChecks.asScala.map(toScalaCheck).toSeq
 
-  val responseCode: ExtendedCheckBuilder = new ExtendedCheckBuilder(AmqpResponseCodeCheckBuilder.ResponseCode);//AmqpDsl.status()
+  val responseCode: ExtendedCheckBuilder =
+    new ExtendedCheckBuilder(AmqpResponseCodeCheckBuilder.ResponseCode); // AmqpDsl.status()
 }
