@@ -2,7 +2,6 @@ package ru.tinkoff.gatling.javaapi;
 
 import static io.gatling.javaapi.core.internal.Expressions.*;
 
-import io.gatling.core.check.Check;
 import ru.tinkoff.gatling.amqp.checks.AmqpResponseCodeCheckBuilder;
 import ru.tinkoff.gatling.amqp.request.AmqpProtocolMessage;
 import ru.tinkoff.gatling.javaapi.check.AmqpChecks;
@@ -25,8 +24,8 @@ public final class AmqpDsl {
         return new RabbitMQConnectionFactoryBuilderBase();
     }
 
-    public static Check<AmqpProtocolMessage> simpleCheck(Function1<AmqpProtocolMessage, Boolean> f) {
-        return new AmqpChecks.SimpleChecksScala().simpleCheck(f.andThen(Boolean::valueOf));
+    public static AmqpChecks.AmqpCheckTypeWrapper simpleCheck(Function1<AmqpProtocolMessage, Boolean> f) {
+        return new AmqpChecks.AmqpCheckTypeWrapper(new AmqpChecks.SimpleChecksScala().simpleCheck(f.andThen(Boolean::valueOf)));
     }
 
     public static ExtendedCheckBuilder responseCode() {

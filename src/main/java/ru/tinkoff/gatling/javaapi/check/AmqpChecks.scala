@@ -18,6 +18,7 @@ import java.{util => ju}
 import scala.jdk.CollectionConverters._
 
 object AmqpChecks {
+  case class AmqpCheckTypeWrapper(value: Check[AmqpProtocolMessage])
   class SimpleChecksScala extends AmqpCheckSupport {}
   private def toScalaCheck(javaCheck: Object): AmqpCheck = {
     javaCheck match {
@@ -59,7 +60,7 @@ object AmqpChecks {
               )
           case unknown                    => throw new IllegalArgumentException(s"AMQP DSL doesn't support $unknown")
         }
-      case amqpCheck: AmqpCheck                    => amqpCheck
+      case amqpCheck: AmqpCheckTypeWrapper         => amqpCheck.value
       case unknown                                 => throw new IllegalArgumentException(s"AMQP DSL doesn't support $unknown")
     }
   }
