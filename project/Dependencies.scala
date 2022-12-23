@@ -4,7 +4,7 @@ object Dependencies {
   val gatlingVersion = "3.8.3"
 
   lazy val gatlingCore: Seq[ModuleID] = Seq(
-    "io.gatling" % "gatling-core" % gatlingVersion % Provided,
+    "io.gatling" % "gatling-core"      % gatlingVersion % Provided,
     "io.gatling" % "gatling-core-java" % gatlingVersion % Provided,
   )
 
