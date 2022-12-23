@@ -68,5 +68,5 @@ object AmqpChecks {
     javaChecks.asScala.map(toScalaCheck).toSeq
 
   val responseCode: ExtendedCheckBuilder =
-    new ExtendedCheckBuilder(AmqpResponseCodeCheckBuilder.ResponseCode); // AmqpDsl.status()
+    new ExtendedCheckBuilder(AmqpResponseCodeCheckBuilder.ResponseCode)
 }
