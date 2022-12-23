@@ -7,16 +7,50 @@ Plugin for support performance testing with AMQP in Gatling(3.7.x)
 # Usage
 
 ## Getting Started
-Plugin is currently available for Scala 2.13.
+Plugin is currently available for Scala 2.13, Java 17, Kotlin.
 
-You may add plugin as dependency in project with your tests. Write this to your build.sbt: 
+You may add plugin as dependency in project with your tests. 
+
+### Scala
+
+Write this to your build.sbt: 
 
 ``` scala
 libraryDependencies += "ru.tinkoff" %% "gatling-amqp-plugin" % <version> % Test
 ``` 
 
+### Java
+
+Write this to your dependencies block in build.gradle:
+
+```java
+gatling "ru.tinkoff:gatling-amqp-plugin_2.13:<version>"
+```
+
+### Kotlin
+
+Write this to your dependencies block in build.gradle:
+
+```kotlin
+gatling("ru.tinkoff:gatling-amqp-plugin_2.13:<version>")
+```
+
 ## Example Scenarios
 
-* Example scenario for [publishing](https://github.com/TinkoffCreditSystems/gatling-amqp-plugin/blob/master/src/test/scala/ru/tinkoff/gatling/amqp/examples/PublishExample.scala)
-* Example scenario for [Publish And Reply](https://github.com/TinkoffCreditSystems/gatling-amqp-plugin/blob/master/src/test/scala/ru/tinkoff/gatling/amqp/examples/RequestReplyExample.scala)
-* Example scenario for [Publish and Reply on different message-brokers](https://github.com/TinkoffCreditSystems/gatling-amqp-plugin/blob/master/src/test/scala/ru/tinkoff/gatling/amqp/examples/RequestReplyTwoBrokerExample.scala)
+### Scala 
+
+* Example scenario for [publishing](src/test/scala/ru/tinkoff/gatling/amqp/examples/PublishExample.scala)
+* Example scenario for [Publish And Reply](src/test/scala/ru/tinkoff/gatling/amqp/examples/RequestReplyExample.scala)
+* Example scenario for [Publish and Reply on different message-brokers](src/test/scala/ru/tinkoff/gatling/amqp/examples/RequestReplyTwoBrokerExample.scala)
+
+### Java
+
+* Example scenario for [publishing](src/test/java/ru/tinkoff/gatling/javaapi/amqp/examples/PublishExample.java)
+* Example scenario for [Publish And Reply](src/test/java/ru/tinkoff/gatling/javaapi/amqp/examples/RequestReplyExample.java)
+* Example scenario for [Publish and Reply on different message-brokers](src/test/java/ru/tinkoff/gatling/javaapi/amqp/examples/RequestReplyTwoBrokerExample.java)
+
+### Kotlin
+
+* Example scenario for [publishing](src/test/kotlin/ru/tinkoff/gatling/javaapi/amqp/examples/PublishExample.kt)
+* Example scenario for [Publish And Reply](src/test/kotlin/ru/tinkoff/gatling/javaapi/amqp/examples/RequestReplyExample.kt)
+* Example scenario for [Publish and Reply on different message-brokers](src/test/kotlin/ru/tinkoff/gatling/javaapi/amqp/examples/RequestReplyTwoBrokerExample.kt)
