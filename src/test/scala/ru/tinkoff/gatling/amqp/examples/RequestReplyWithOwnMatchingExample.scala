@@ -12,7 +12,7 @@ import scala.concurrent.duration._
 class RequestReplyWithOwnMatchingExample extends Simulation {
 
   def matchByMessage(message: AmqpProtocolMessage): String = {
-    // do something with the message and extract the values your are interested in
+    // do something with the message and extract the values you are interested in
     // method is called:
     // - for each message which will be sent out
     // - for each message which has been received
