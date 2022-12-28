@@ -15,6 +15,6 @@ ThisBuild / developers  := List(
   ),
 )
 
-ThisBuild / description := "Plugin for support performance testing with AMQP in Gatling(3.5.x)."
+ThisBuild / description := "Plugin for support performance testing with AMQP in Gatling"
 ThisBuild / licenses    := List("Apache 2" -> new URL("http://www.apache.org/licenses/LICENSE-2.0.txt"))
 ThisBuild / homepage    := Some(url("https://github.com/TinkoffCreditSystems/gatling-amqp-plugin"))
