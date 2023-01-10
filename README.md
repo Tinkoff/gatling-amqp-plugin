@@ -45,12 +45,12 @@ gatling("ru.tinkoff:gatling-amqp-plugin_2.13:<version>")
 
 ### Java
 
-* Example scenario for [publishing](src/test/java/ru/tinkoff/gatling/javaapi/amqp/examples/PublishExample.java)
-* Example scenario for [Publish And Reply](src/test/java/ru/tinkoff/gatling/javaapi/amqp/examples/RequestReplyExample.java)
-* Example scenario for [Publish and Reply on different message-brokers](src/test/java/ru/tinkoff/gatling/javaapi/amqp/examples/RequestReplyTwoBrokerExample.java)
+* Example scenario for [publishing](src/test/java/ru/tinkoff/gatling/amqp/javaapi/examples/PublishExample.java)
+* Example scenario for [Publish And Reply](src/test/java/ru/tinkoff/gatling/amqp/javaapi/examples/RequestReplyExample.java)
+* Example scenario for [Publish and Reply on different message-brokers](src/test/java/ru/tinkoff/gatling/amqp/javaapi/examples/RequestReplyTwoBrokerExample.java)
 
 ### Kotlin
 
-* Example scenario for [publishing](src/test/kotlin/ru/tinkoff/gatling/javaapi/amqp/examples/PublishExample.kt)
-* Example scenario for [Publish And Reply](src/test/kotlin/ru/tinkoff/gatling/javaapi/amqp/examples/RequestReplyExample.kt)
-* Example scenario for [Publish and Reply on different message-brokers](src/test/kotlin/ru/tinkoff/gatling/javaapi/amqp/examples/RequestReplyTwoBrokerExample.kt)
+* Example scenario for [publishing](src/test/kotlin/ru/tinkoff/gatling/amqp/javaapi/examples/PublishExample.kt)
+* Example scenario for [Publish And Reply](src/test/kotlin/ru/tinkoff/gatling/amqp/javaapi/examples/RequestReplyExample.kt)
+* Example scenario for [Publish and Reply on different message-brokers](src/test/kotlin/ru/tinkoff/gatling/amqp/javaapi/examples/RequestReplyTwoBrokerExample.kt)
