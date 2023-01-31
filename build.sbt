@@ -1,5 +1,7 @@
 import Dependencies._
 
+coverageEnabled := true
+
 lazy val root = (project in file("."))
   .enablePlugins(GitVersioning)
   .settings(
