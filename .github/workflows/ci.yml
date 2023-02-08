@@ -31,8 +31,11 @@ jobs:
         with:
           java-version: openjdk@1.17
 
-      - name: Test Release
-        run: sbt clean scalafmtCheckAll scalafmtSbtCheck compile coverage test
+      - name: Unit Tests
+        run: sbt clean scalafmtCheckAll scalafmtSbtCheck compile coverage test coverageReport
+
+      - name: Integration Tests
+        run: sbt Gatling/testOnly ru.tinkoff.gatling.amqp.examples.AmqpGatlingRunnerTest
 #  publish:
 #    name: Publish Release
 #    needs: [test]
