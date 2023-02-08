@@ -19,7 +19,7 @@ class AmqpGatlingRunnerTest extends Simulation {
     amqp
       .connectionFactory(
         rabbitmq
-          .host("rabbitmq")
+          .host("localhost")
           .port(5672)
           .username("rabbitmq")
           .password("rabbitmq")
