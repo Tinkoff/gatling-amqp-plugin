@@ -1,9 +1,9 @@
 package ru.tinkoff.gatling.amqp.examples
 
 import io.gatling.core.Predef._
-import ru.tinkoff.gatling.amqp.Predef._
+import ru.tinkoff.gatling.amqp.javaapi.AmqpDsl._
 
-class AmqpGatlingRunnerTest extends Simulation {
+class JavaTest extends Simulation {
 
   setUp(
     scenario("Test Scenario")
@@ -12,17 +12,28 @@ class AmqpGatlingRunnerTest extends Simulation {
           .queueExchange("test_queue")
           .textMessage("test message")
           .priority(0)
-          .messageId("1"),
+          .messageId("1")
+          .asScala(),
       )
       .exec(
-        amqp("Test request with reply").requestReply
+        amqp("Test queue exchange").requestReply
           .queueExchange("test_queue")
           .replyExchange("test_queue")
           .textMessage("test message")
           .priority(0)
-          .messageId("!")
+          .messageId("1")
           .expiration("10")
-          .contentType("String"),
+          .asScala(),
+      )
+      .exec(
+        amqp("Test topic exchange").requestReply
+          .topicExchange("test_queue", "routingKey")
+          .replyExchange("test_queue")
+          .noReplyTo()
+          .textMessage("test message")
+          .priority(0)
+          .messageId("1")
+          .asScala(),
       )
       .inject(atOnceUsers(1)),
   ).protocols(
@@ -33,11 +44,12 @@ class AmqpGatlingRunnerTest extends Simulation {
           .port(5672)
           .username("rabbitmq")
           .password("rabbitmq")
-          .vhost("/"),
+          .vhost("/")
+          .build(),
       )
       .replyTimeout(60000)
       .consumerThreadsCount(8)
-      .usePersistentDeliveryMode
-      .matchByCorrelationId,
-  ).maxDuration(10)
+      .usePersistentDeliveryMode()
+      .protocol(),
+  ).maxDuration(60)
 }

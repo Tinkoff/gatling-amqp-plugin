@@ -35,7 +35,10 @@ jobs:
         run: sbt clean scalafmtCheckAll scalafmtSbtCheck compile coverage test coverageReport
 
       - name: Integration Tests
-        run: sbt "Gatling / testOnly ru.tinkoff.gatling.amqp.examples.AmqpGatlingRunnerTest"
+        run: sbt clean coverage "Gatling / testOnly ru.tinkoff.gatling.amqp.examples.AmqpGatlingRunnerTest" coverageReport
+
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v3
 #  publish:
 #    name: Publish Release
 #    needs: [test]

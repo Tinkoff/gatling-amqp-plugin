@@ -1,5 +1,6 @@
 package ru.tinkoff.gatling.amqp.examples
 
+import io.gatling.core.Predef._
 import io.gatling.core.action.builder.ActionBuilder
 import io.gatling.core.config.GatlingConfiguration
 import io.gatling.core.session.{Session, StaticValueExpression}
@@ -8,8 +9,10 @@ import io.gatling.netty.util.Transports
 import io.netty.channel._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import ru.tinkoff.gatling.amqp.AmqpCheck
 import ru.tinkoff.gatling.amqp.Predef._
 import ru.tinkoff.gatling.amqp.action.{PublishBuilder, RequestReplyBuilder}
+import ru.tinkoff.gatling.amqp.checks.{AmqpCheckMaterializer, AmqpMessagePreparer}
 import ru.tinkoff.gatling.amqp.request._
 
 import java.util.Date
@@ -132,6 +135,8 @@ class AmqpRequestsTest extends AnyFlatSpec with Matchers {
   it should "RequestReply request test" in {
     val date = new Date()
 
+    val checkMessageId: AmqpCheck = simpleCheck(msg => msg.messageId("newId").messageId.isEmpty)
+
     val amqpRequest: ActionBuilder = amqp(StaticValueExpression[String]("Test request"))
       .requestReply(gatlingConfig)
       .queueExchange(
@@ -148,6 +153,7 @@ class AmqpRequestsTest extends AnyFlatSpec with Matchers {
       .expiration(StaticValueExpression[String]("expiration"))
       .timestamp(StaticValueExpression[Date](date))
       .amqpType(StaticValueExpression[String]("amqpType"))
+      .check(checkMessageId)
       .build()
 
     val expectedRequest = RequestReplyBuilder(
@@ -171,6 +177,7 @@ class AmqpRequestsTest extends AnyFlatSpec with Matchers {
           timestamp = Some(StaticValueExpression[Date](date)),
           messageId = Some(StaticValueExpression[String]("messageId")),
         ),
+        checks = List(checkMessageId),
       ),
       AmqpQueueExchange(name = StaticValueExpression[String]("test_queue_out")),
       setReplyTo = false,
