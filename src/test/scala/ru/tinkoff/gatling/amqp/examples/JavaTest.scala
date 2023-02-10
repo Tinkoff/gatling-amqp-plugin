@@ -1,12 +1,16 @@
 package ru.tinkoff.gatling.amqp.examples
 
+import com.rabbitmq.client.BuiltinExchangeType
 import io.gatling.core.Predef._
+import ru.tinkoff.gatling.amqp.javaapi.AmqpDsl
 import ru.tinkoff.gatling.amqp.javaapi.AmqpDsl._
-
-import java.util.Date
+import ru.tinkoff.gatling.amqp.javaapi.protocol._
 
 class JavaTest extends Simulation {
-  val date = new Date()
+
+  val testQueue = new AmqpQueue("test_queue",true,false,false, java.util.Map.of())
+  val testExchange = new AmqpExchange("test_exchange", BuiltinExchangeType.TOPIC,true,false, java.util.Map.of())
+
 
   setUp(
     scenario("Test Scenario")
@@ -27,8 +31,6 @@ class JavaTest extends Simulation {
           .messageId("1")
           .expiration("60000")
           .contentEncoding("text/plain")
-          .check(
-          )
           .asScala(),
       )
       .exec(
@@ -37,9 +39,7 @@ class JavaTest extends Simulation {
           .replyExchange("test_queue")
           .textMessage("Topic test message")
           .priority(0)
-          .messageId("1")
-          .replyTo("test_queue")
-          .appId("appId")
+          .messageId("2")
           .asScala(),
       )
       .exec(
@@ -48,8 +48,12 @@ class JavaTest extends Simulation {
           .replyExchange("test_queue")
           .textMessage("Direct test message")
           .priority(0)
-          .messageId("1")
+          .messageId("3")
           .replyTo("test_queue")
+          .appId("appId")
+          .check(
+            simpleCheck(msg => msg.messageId.matches("3"))
+          )
           .asScala(),
       )
       .inject(atOnceUsers(1)),
@@ -64,6 +68,9 @@ class JavaTest extends Simulation {
           .vhost("/")
           .build(),
       )
+      .declare(testExchange)
+      .declare(testQueue)
+      .bindQueue(testQueue, testExchange,"routingKey", java.util.Map.of())
       .replyTimeout(60000)
       .consumerThreadsCount(8)
       .usePersistentDeliveryMode()

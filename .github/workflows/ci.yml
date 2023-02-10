@@ -32,11 +32,11 @@ jobs:
         with:
           java-version: openjdk@1.17
 
-      - name: Prepare queue for rabbitmq
-        run: |
-          curl -i -u "rabbitmq:rabbitmq" -H "content-type:application/json" -XPUT -d'{"durable":true,"arguments":{}}' "http://localhost:15672/api/queues/%2f/test_queue"
-          curl -i -u "rabbitmq:rabbitmq" -H "content-type:application/json" -XPUT -d'{"type":"topic","durable":true}' "http://localhost:15672/api/exchanges/%2f/test_exchange"
-          curl -i -u "rabbitmq:rabbitmq" -H "content-type:application/json" -XPOST -d'{"routing_key":"routingKey","arguments":{}}' "http://localhost:15672/api/bindings/%2f/e/test_exchange/q/test_queue"
+#      - name: Prepare queue for rabbitmq
+#        run: |
+#          curl -i -u "rabbitmq:rabbitmq" -H "content-type:application/json" -XPUT -d'{"type":"topic","durable":true}' "http://localhost:15672/api/exchanges/%2f/test_exchange"
+#          curl -i -u "rabbitmq:rabbitmq" -H "content-type:application/json" -XPUT -d'{"durable":true,"arguments":{}}' "http://localhost:15672/api/queues/%2f/test_queue"
+#          curl -i -u "rabbitmq:rabbitmq" -H "content-type:application/json" -XPOST -d'{"routing_key":"routingKey","arguments":{}}' "http://localhost:15672/api/bindings/%2f/e/test_exchange/q/test_queue"
 
 #      - name: Unit Tests
 #        run: sbt clean scalafmtCheckAll scalafmtSbtCheck compile coverage test coverageReport
