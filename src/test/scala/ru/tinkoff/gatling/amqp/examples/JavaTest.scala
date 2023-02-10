@@ -3,7 +3,10 @@ package ru.tinkoff.gatling.amqp.examples
 import io.gatling.core.Predef._
 import ru.tinkoff.gatling.amqp.javaapi.AmqpDsl._
 
+import java.util.Date
+
 class JavaTest extends Simulation {
+  val date = new Date()
 
   setUp(
     scenario("Test Scenario")
@@ -22,7 +25,10 @@ class JavaTest extends Simulation {
           .textMessage("Queue test message")
           .priority(0)
           .messageId("1")
-          .expiration("10")
+          .expiration("60000")
+          .contentEncoding("text/plain")
+          .check(
+          )
           .asScala(),
       )
       .exec(
@@ -32,6 +38,18 @@ class JavaTest extends Simulation {
           .textMessage("Topic test message")
           .priority(0)
           .messageId("1")
+          .replyTo("test_queue")
+          .appId("appId")
+          .asScala(),
+      )
+      .exec(
+        amqp("Test direct exchange").requestReply
+          .directExchange("test_exchange", "routingKey")
+          .replyExchange("test_queue")
+          .textMessage("Direct test message")
+          .priority(0)
+          .messageId("1")
+          .replyTo("test_queue")
           .asScala(),
       )
       .inject(atOnceUsers(1)),
@@ -50,5 +68,5 @@ class JavaTest extends Simulation {
       .consumerThreadsCount(8)
       .usePersistentDeliveryMode()
       .protocol(),
-  ).maxDuration(60)
+  ).maxDuration(20)
 }
