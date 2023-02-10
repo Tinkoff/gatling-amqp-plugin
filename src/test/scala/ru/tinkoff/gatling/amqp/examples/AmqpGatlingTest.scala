@@ -34,6 +34,7 @@ class AmqpGatlingTest extends Simulation {
           .textMessage("Publish topic test message")
           .priority(0)
           .messageId("2")
+          .userId("rabbitmq")
           .asScala(),
       )
       .exec(
@@ -42,8 +43,8 @@ class AmqpGatlingTest extends Simulation {
           .textMessage("Publish direct test message")
           .priority(0)
           .messageId("3")
+          .appId("test_app")
           .replyTo("test_queue")
-          .appId("appId")
           .asScala(),
       )
       .exec(
@@ -51,10 +52,10 @@ class AmqpGatlingTest extends Simulation {
           .queueExchange("test_queue")
           .replyExchange("test_queue")
           .textMessage("""{"message":"RR queue test message"}""")
-          .priority(0)
-          .messageId("4")
           .contentEncoding("application/json")
           .contentType("json")
+          .priority(0)
+          .messageId("4")
           .check(
             jsonPath("$.message").is("RR queue test message"),
             jmesPath("message").is("RR queue test message")
@@ -67,7 +68,6 @@ class AmqpGatlingTest extends Simulation {
           .replyExchange("test_queue")
           .bytesMessage("#{bytes}")
           .contentEncoding("application/x-binary")
-          .contentType("binary")
           .priority(0)
           .messageId("5")
           .check(
@@ -82,8 +82,6 @@ class AmqpGatlingTest extends Simulation {
           .textMessage("RR direct test message")
           .priority(0)
           .messageId("6")
-          .replyTo("test_queue")
-          .appId("appId")
           .check(
             simpleCheck(msg => msg.messageId.matches("6")),
             bodyString.is("RR direct test message"),
@@ -123,10 +121,9 @@ class AmqpGatlingTest extends Simulation {
       .declare(testExchange)
       .declare(testQueue)
       .bindQueue(testQueue, testExchange,"routingKey", java.util.Map.of())
-      .replyTimeout(60000)
-      .consumerThreadsCount(8)
+      .replyTimeout(2000)
+      .consumerThreadsCount(1)
       .usePersistentDeliveryMode()
-      .matchByMessageId()
       .protocol(),
   ).maxDuration(20)
 }
