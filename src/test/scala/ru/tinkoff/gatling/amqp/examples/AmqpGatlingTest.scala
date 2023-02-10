@@ -4,6 +4,14 @@ import com.rabbitmq.client.BuiltinExchangeType
 import io.gatling.core.Predef._
 import ru.tinkoff.gatling.amqp.javaapi.AmqpDsl._
 import ru.tinkoff.gatling.amqp.javaapi.protocol._
+import io.gatling.javaapi.core.CoreDsl.{
+  bodyString,
+  bodyBytes,
+  jsonPath,
+  jmesPath,
+  xpath,
+  substring
+}
 
 class AmqpGatlingTest extends Simulation {
 
@@ -46,11 +54,15 @@ class AmqpGatlingTest extends Simulation {
         amqp("Test request reply queue exchange").requestReply
           .queueExchange("test_queue")
           .replyExchange("test_queue")
-          .textMessage("RR queue test message")
+          .textMessage("""{"message":"RR queue test message"}""")
           .priority(0)
           .messageId("4")
-          .contentEncoding("text/plain")
-          .contentType("text")
+          .contentEncoding("application/json")
+          .contentType("json")
+          .check(
+            jsonPath("$.message").is("RR queue test message"),
+            jmesPath("message").is("RR queue test message")
+          )
           .asScala(),
       )
       .exec(
@@ -58,8 +70,13 @@ class AmqpGatlingTest extends Simulation {
           .topicExchange("test_exchange", "routingKey")
           .replyExchange("test_queue")
           .textMessage("RR topic test message")
+          .contentEncoding("text/plain")
+          .contentType("text")
           .priority(0)
           .messageId("5")
+          .check(
+            bodyBytes.exists()
+          )
           .asScala(),
       )
       .exec(
@@ -72,7 +89,26 @@ class AmqpGatlingTest extends Simulation {
           .replyTo("test_queue")
           .appId("appId")
           .check(
-            simpleCheck(msg => msg.messageId.matches("6"))
+            simpleCheck(msg => msg.messageId.matches("6")),
+            bodyString.is("RR direct test message"),
+            substring("RR").exists()
+          )
+          .asScala(),
+      )
+      .exec(
+        amqp("Test xpath check").requestReply
+          .directExchange("test_exchange", "routingKey")
+          .replyExchange("test_queue")
+          .textMessage(
+            """
+              |<Request>
+              |    <message>xpath check</message>
+              |</Request>
+              |""".stripMargin)
+          .priority(0)
+          .messageId("7")
+          .check(
+            xpath("""//Request/message""").is("xpath check")
           )
           .asScala(),
       )
