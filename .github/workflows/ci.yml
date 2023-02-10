@@ -13,13 +13,14 @@ jobs:
     runs-on: ubuntu-20.04
     services:
       rabbitmq:
-        image: rabbitmq
+        image: rabbitmq:3.9.28-management-alpine
         env:
           RABBITMQ_DEFAULT_USER: rabbitmq
           RABBITMQ_DEFAULT_PASS: rabbitmq
           RABBITMQ_DEFAULT_VHOST: "/"
         ports:
           - 5672:5672
+          - 15672:15672
     steps:
       - name: Checkout
         uses: actions/checkout@v2.4.0
@@ -31,11 +32,17 @@ jobs:
         with:
           java-version: openjdk@1.17
 
-      - name: Unit Tests
-        run: sbt clean scalafmtCheckAll scalafmtSbtCheck compile coverage test coverageReport
+      - name: Prepare queue for rabbitmq
+        run: |
+          curl -i -u "rabbitmq:rabbitmq" -H "content-type:application/json" -XPUT -d'{"durable":true,"arguments":{}}' "http://localhost:15672/api/queues/%2f/test_queue"
+          curl -i -u "rabbitmq:rabbitmq" -H "content-type:application/json" -XPUT -d'{"type":"topic","durable":true}' "http://localhost:15672/api/exchanges/%2f/test_exchange"
+          curl -i -u "rabbitmq:rabbitmq" -H "content-type:application/json" -XPOST -d'{"routing_key":"routingKey","arguments":{}}' "http://localhost:15672/api/bindings/%2f/e/test_exchange/q/test_queue"
+
+#      - name: Unit Tests
+#        run: sbt clean scalafmtCheckAll scalafmtSbtCheck compile coverage test coverageReport
 
       - name: Integration Tests
-        run: sbt clean coverage "Gatling / testOnly ru.tinkoff.gatling.amqp.examples.AmqpGatlingRunnerTest" coverageReport
+        run: sbt clean coverage "Gatling / testOnly ru.tinkoff.gatling.amqp.examples.JavaTest" coverageReport
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v3

@@ -27,7 +27,7 @@ class JavaTest extends Simulation {
       )
       .exec(
         amqp("Test topic exchange").requestReply
-          .topicExchange("test_queue", "routingKey")
+          .topicExchange("test_exchange", "routingKey")
           .replyExchange("test_queue")
           .noReplyTo()
           .textMessage("test message")
