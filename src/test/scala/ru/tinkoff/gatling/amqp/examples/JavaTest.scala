@@ -10,7 +10,7 @@ class JavaTest extends Simulation {
       .exec(
         amqp("Test publish request").publish
           .queueExchange("test_queue")
-          .textMessage("test message")
+          .textMessage("Publish test message")
           .priority(0)
           .messageId("1")
           .asScala(),
@@ -19,7 +19,7 @@ class JavaTest extends Simulation {
         amqp("Test queue exchange").requestReply
           .queueExchange("test_queue")
           .replyExchange("test_queue")
-          .textMessage("test message")
+          .textMessage("Queue test message")
           .priority(0)
           .messageId("1")
           .expiration("10")
@@ -29,8 +29,7 @@ class JavaTest extends Simulation {
         amqp("Test topic exchange").requestReply
           .topicExchange("test_exchange", "routingKey")
           .replyExchange("test_queue")
-          .noReplyTo()
-          .textMessage("test message")
+          .textMessage("Topic test message")
           .priority(0)
           .messageId("1")
           .asScala(),
