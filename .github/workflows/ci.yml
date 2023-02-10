@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-20.04
     services:
       rabbitmq:
-        image: rabbitmq:3.9.28-management-alpine
+        image: rabbitmq:3.9.7-management-alpine
         env:
           RABBITMQ_DEFAULT_USER: rabbitmq
           RABBITMQ_DEFAULT_PASS: rabbitmq
@@ -32,9 +32,9 @@ jobs:
         with:
           java-version: openjdk@1.17
 
-      - name: Prepare RabbitMQ
-        run: |
-          curl -i -u "rabbitmq:rabbitmq" -H "content-type:application/json" -XPUT -d'{"type":"topic","durable":true}' "http://localhost:15672/api/exchanges/%2f/test_exchange"
+#      - name: Prepare RabbitMQ
+#        run: |
+#          curl -i -u "rabbitmq:rabbitmq" -H "content-type:application/json" -XPUT -d'{"type":"topic","durable":true}' "http://localhost:15672/api/exchanges/%2f/test_exchange"
 
       - name: Tests
         run: sbt clean coverage "Gatling / testOnly ru.tinkoff.gatling.amqp.examples.AmqpGatlingTest" coverageReport
