@@ -4,23 +4,19 @@ import com.rabbitmq.client.BuiltinExchangeType
 import io.gatling.core.Predef._
 import ru.tinkoff.gatling.amqp.javaapi.AmqpDsl._
 import ru.tinkoff.gatling.amqp.javaapi.protocol._
-import io.gatling.javaapi.core.CoreDsl.{
-  bodyString,
-  bodyBytes,
-  jsonPath,
-  jmesPath,
-  xpath,
-  substring
-}
+import io.gatling.javaapi.core.CoreDsl.{bodyBytes, bodyString, jmesPath, jsonPath, substring, xpath}
+
+import java.util
+import scala.jdk.javaapi.CollectionConverters.asJava
 
 class AmqpGatlingTest extends Simulation {
 
   val testQueue = new AmqpQueue("test_queue",true,false,false, java.util.Map.of())
   val testExchange = new AmqpExchange("test_exchange", BuiltinExchangeType.TOPIC,true,false, java.util.Map.of())
 
-
   setUp(
     scenario("Test Scenario")
+      .exec{s => s.set("bytes", "RR topic test message".getBytes)}
       .exec(
         amqp("Test publish queue exchange").publish
           .queueExchange("test_queue")
@@ -69,13 +65,13 @@ class AmqpGatlingTest extends Simulation {
         amqp("Test request reply topic exchange").requestReply
           .topicExchange("test_exchange", "routingKey")
           .replyExchange("test_queue")
-          .textMessage("RR topic test message")
-          .contentEncoding("text/plain")
-          .contentType("text")
+          .bytesMessage("#{bytes}")
+          .contentEncoding("application/x-binary")
+          .contentType("binary")
           .priority(0)
           .messageId("5")
           .check(
-            bodyBytes.exists()
+            bodyBytes.is("RR topic test message".getBytes)
           )
           .asScala(),
       )
