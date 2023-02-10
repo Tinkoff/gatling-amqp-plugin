@@ -9,7 +9,6 @@ lazy val root = (project in file("."))
     scalaVersion := "2.13.10",
     libraryDependencies ++= gatling ++ gatlingCore,
     libraryDependencies ++= Seq(rabbitmq, commonsPool, fastUUID),
-    libraryDependencies ++= scalaTest,
     scalacOptions ++= Seq(
       "-encoding",
       "utf8", // Option and arguments on same line

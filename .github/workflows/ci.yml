@@ -32,40 +32,36 @@ jobs:
         with:
           java-version: openjdk@1.17
 
-#      - name: Prepare queue for rabbitmq
-#        run: |
-#          curl -i -u "rabbitmq:rabbitmq" -H "content-type:application/json" -XPUT -d'{"type":"topic","durable":true}' "http://localhost:15672/api/exchanges/%2f/test_exchange"
-#          curl -i -u "rabbitmq:rabbitmq" -H "content-type:application/json" -XPUT -d'{"durable":true,"arguments":{}}' "http://localhost:15672/api/queues/%2f/test_queue"
-#          curl -i -u "rabbitmq:rabbitmq" -H "content-type:application/json" -XPOST -d'{"routing_key":"routingKey","arguments":{}}' "http://localhost:15672/api/bindings/%2f/e/test_exchange/q/test_queue"
+      - name: Prepare RabbitMQ
+        run: |
+          curl -i -u "rabbitmq:rabbitmq" -H "content-type:application/json" -XPUT -d'{"type":"topic","durable":true}' "http://localhost:15672/api/exchanges/%2f/test_exchange"
 
-#      - name: Unit Tests
-#        run: sbt clean scalafmtCheckAll scalafmtSbtCheck compile coverage test coverageReport
-
-      - name: Integration Tests
-        run: sbt clean coverage "Gatling / testOnly ru.tinkoff.gatling.amqp.examples.JavaTest" coverageReport
+      - name: Tests
+        run: sbt clean coverage "Gatling / testOnly ru.tinkoff.gatling.amqp.examples.AmqpGatlingTest" coverageReport
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v3
-#  publish:
-#    name: Publish Release
-#    needs: [test]
-#    if: github.event_name != 'pull_request' && (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/v'))
-#    runs-on: ubuntu-20.04
-#    steps:
-#      - name: Checkout
-#        uses: actions/checkout@v2.4.0
-#        with:
-#          fetch-depth: 0
-#
-#      - name: Setup Scala
-#        uses: olafurpg/setup-scala@v13
-#        with:
-#          java-version: openjdk@1.17
-#
-#      - name: Publish Release
-#        run: sbt ci-release
-#        env:
-#          PGP_PASSPHRASE: ${{ secrets.PGP_PASSPHRASE }}
-#          PGP_SECRET: ${{ secrets.PGP_SECRET }}
-#          SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
-#          SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+
+  publish:
+    name: Publish Release
+    needs: [test]
+    if: github.event_name != 'pull_request' && (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/v'))
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2.4.0
+        with:
+          fetch-depth: 0
+
+      - name: Setup Scala
+        uses: olafurpg/setup-scala@v13
+        with:
+          java-version: openjdk@1.17
+
+      - name: Publish Release
+        run: sbt ci-release
+        env:
+          PGP_PASSPHRASE: ${{ secrets.PGP_PASSPHRASE }}
+          PGP_SECRET: ${{ secrets.PGP_SECRET }}
+          SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+          SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}

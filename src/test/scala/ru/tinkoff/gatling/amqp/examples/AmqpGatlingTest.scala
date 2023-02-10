@@ -2,11 +2,10 @@ package ru.tinkoff.gatling.amqp.examples
 
 import com.rabbitmq.client.BuiltinExchangeType
 import io.gatling.core.Predef._
-import ru.tinkoff.gatling.amqp.javaapi.AmqpDsl
 import ru.tinkoff.gatling.amqp.javaapi.AmqpDsl._
 import ru.tinkoff.gatling.amqp.javaapi.protocol._
 
-class JavaTest extends Simulation {
+class AmqpGatlingTest extends Simulation {
 
   val testQueue = new AmqpQueue("test_queue",true,false,false, java.util.Map.of())
   val testExchange = new AmqpExchange("test_exchange", BuiltinExchangeType.TOPIC,true,false, java.util.Map.of())

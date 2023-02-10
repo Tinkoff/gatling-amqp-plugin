@@ -17,8 +17,4 @@ object Dependencies {
   lazy val commonsPool = "org.apache.commons" % "commons-pool2" % "2.11.1"
   lazy val fastUUID    = "com.eatthepath"     % "fast-uuid"     % "0.2.0"
 
-  lazy val scalaTest: Seq[ModuleID] = Seq(
-    "org.scalatest" %% "scalatest" % "3.2.15" % "test",
-  )
-
 }
