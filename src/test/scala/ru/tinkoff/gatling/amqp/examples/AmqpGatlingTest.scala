@@ -125,5 +125,9 @@ class AmqpGatlingTest extends Simulation {
       .consumerThreadsCount(1)
       .usePersistentDeliveryMode()
       .protocol(),
-  ).maxDuration(20)
+  )
+    .maxDuration(20)
+    .assertions(
+      global.failedRequests.percent.is(0.0)
+    )
 }
