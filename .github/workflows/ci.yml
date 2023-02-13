@@ -32,12 +32,16 @@ jobs:
         with:
           java-version: openjdk@1.17
 
-#      - name: Prepare RabbitMQ
-#        run: |
-#          curl -i -u "rabbitmq:rabbitmq" -H "content-type:application/json" -XPUT -d'{"type":"topic","durable":true}' "http://localhost:15672/api/exchanges/%2f/test_exchange"
-
       - name: Tests
-        run: sbt clean coverage "Gatling / testOnly ru.tinkoff.gatling.amqp.examples.AmqpGatlingTest" coverageReport
+        env:
+          EXPECTED_EXIT_CODE: 0
+        run: |
+          sbt clean coverage "Gatling / testOnly ru.tinkoff.gatling.amqp.examples.AmqpGatlingTest" || STATUS_TEST_SUCCESS=$?
+          sbt coverageReport
+          echo "Exit code: $STATUS_TEST_SUCCESS, expected: ${EXPECTED_EXIT_CODE}"
+          if [ "$STATUS_TEST_SUCCESS" -ne "${EXPECTED_EXIT_CODE}" ]; then
+            exit $STATUS_TEST_SUCCESS
+          fi
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v3
