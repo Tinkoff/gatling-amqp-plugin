@@ -1,13 +1,10 @@
-package ru.tinkoff.gatling.amqp.it
+package ru.tinkoff.gatling.amqp.examples
 
 import com.rabbitmq.client.BuiltinExchangeType
 import io.gatling.core.Predef._
+import io.gatling.javaapi.core.CoreDsl.{bodyBytes, bodyString, jmesPath, jsonPath, substring, xpath}
 import ru.tinkoff.gatling.amqp.javaapi.AmqpDsl._
 import ru.tinkoff.gatling.amqp.javaapi.protocol._
-import io.gatling.javaapi.core.CoreDsl.{bodyBytes, bodyString, jmesPath, jsonPath, substring, xpath}
-
-import java.util
-import scala.jdk.javaapi.CollectionConverters.asJava
 
 class AmqpGatlingTest extends Simulation {
 
