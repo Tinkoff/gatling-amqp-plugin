@@ -1,7 +1,6 @@
 package ru.tinkoff.gatling.amqp.javaapi.request;
 
 import java.nio.charset.Charset;
-import java.util.ArrayList;
 
 import static io.gatling.javaapi.core.internal.Expressions.*;
 
@@ -30,7 +29,11 @@ public class RequestReplyDslBuilderMessage {
         return new RequestReplyDslBuilder(wrapped.textMessage(toStringExpression(text), charset));
     }
 
-    public RequestReplyDslBuilder bytesMessage(ArrayList<Byte> bytes){
-        return new RequestReplyDslBuilder(wrapped.bytesMessage(toBytesExpression(bytes.toString())));
+    public RequestReplyDslBuilder bytesMessage(byte[] bytes){
+        return new RequestReplyDslBuilder(wrapped.bytesMessage(toStaticValueExpression(bytes)));
+    }
+
+    public RequestReplyDslBuilder bytesMessage(String el){
+        return new RequestReplyDslBuilder(wrapped.bytesMessage(toBytesExpression(el)));
     }
 }
