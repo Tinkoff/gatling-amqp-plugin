@@ -1,4 +1,4 @@
-package ru.tinkoff.gatling.amqp.examples
+package ru.tinkoff.gatling.amqp.it
 
 import com.rabbitmq.client.BuiltinExchangeType
 import io.gatling.core.Predef._
