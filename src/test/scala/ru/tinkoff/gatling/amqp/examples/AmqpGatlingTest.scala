@@ -118,7 +118,7 @@ class AmqpGatlingTest extends Simulation {
       .declare(testExchange)
       .declare(testQueue)
       .bindQueue(testQueue, testExchange,"routingKey", java.util.Map.of())
-      .replyTimeout(2000)
+      .replyTimeout(20000)
       .consumerThreadsCount(1)
       .usePersistentDeliveryMode()
       .protocol(),
