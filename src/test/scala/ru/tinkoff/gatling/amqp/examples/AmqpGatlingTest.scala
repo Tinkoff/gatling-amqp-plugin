@@ -8,12 +8,11 @@ import ru.tinkoff.gatling.amqp.javaapi.protocol._
 
 class AmqpGatlingTest extends Simulation {
 
-  val testQueue = new AmqpQueue("test_queue",true,false,false, java.util.Map.of())
-  val testExchange = new AmqpExchange("test_exchange", BuiltinExchangeType.TOPIC,true,false, java.util.Map.of())
+  val testQueue    = new AmqpQueue("test_queue", true, false, false, java.util.Map.of())
+  val testExchange = new AmqpExchange("test_exchange", BuiltinExchangeType.TOPIC, true, false, java.util.Map.of())
 
   setUp(
-    scenario("Test Scenario")
-      .exec{s => s.set("bytes", "RR topic test message".getBytes)}
+    scenario("Test Scenario").exec { s => s.set("bytes", "RR topic test message".getBytes) }
       .exec(
         amqp("Test publish queue exchange").publish
           .queueExchange("test_queue")
@@ -27,7 +26,7 @@ class AmqpGatlingTest extends Simulation {
       )
       .exec(
         amqp("Test publish topic exchange").publish
-          .topicExchange("test_exchange","routingKey")
+          .topicExchange("test_exchange", "routingKey")
           .textMessage("Publish topic test message")
           .priority(0)
           .messageId("2")
@@ -55,7 +54,7 @@ class AmqpGatlingTest extends Simulation {
           .messageId("4")
           .check(
             jsonPath("$.message").is("RR queue test message"),
-            jmesPath("message").is("RR queue test message")
+            jmesPath("message").is("RR queue test message"),
           )
           .asScala(),
       )
@@ -68,7 +67,7 @@ class AmqpGatlingTest extends Simulation {
           .priority(0)
           .messageId("5")
           .check(
-            bodyBytes.is("RR topic test message".getBytes)
+            bodyBytes.is("RR topic test message".getBytes),
           )
           .asScala(),
       )
@@ -82,7 +81,7 @@ class AmqpGatlingTest extends Simulation {
           .check(
             simpleCheck(msg => msg.messageId.matches("6")),
             bodyString.is("RR direct test message"),
-            substring("RR").exists()
+            substring("RR").exists(),
           )
           .asScala(),
       )
@@ -90,8 +89,7 @@ class AmqpGatlingTest extends Simulation {
         amqp("Test xpath check").requestReply
           .directExchange("test_exchange", "routingKey")
           .replyExchange("test_queue")
-          .textMessage(
-            """
+          .textMessage("""
               |<Request>
               |    <message>xpath check</message>
               |</Request>
@@ -99,7 +97,7 @@ class AmqpGatlingTest extends Simulation {
           .priority(0)
           .messageId("7")
           .check(
-            xpath("""//Request/message""").is("xpath check")
+            xpath("""//Request/message""").is("xpath check"),
           )
           .asScala(),
       )
@@ -117,14 +115,13 @@ class AmqpGatlingTest extends Simulation {
       )
       .declare(testExchange)
       .declare(testQueue)
-      .bindQueue(testQueue, testExchange,"routingKey", java.util.Map.of())
+      .bindQueue(testQueue, testExchange, "routingKey", java.util.Map.of())
       .replyTimeout(20000)
       .consumerThreadsCount(1)
       .usePersistentDeliveryMode()
       .protocol(),
-  )
-    .maxDuration(20)
+  ).maxDuration(20)
     .assertions(
-      global.failedRequests.percent.is(0.0)
+      global.failedRequests.percent.is(0.0),
     )
 }
