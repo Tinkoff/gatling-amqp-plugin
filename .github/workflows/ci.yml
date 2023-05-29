@@ -32,8 +32,11 @@ jobs:
         with:
           java-version: openjdk@1.17
 
+      - name: Test Release
+        run: sbt clean scalafmtCheckAll scalafmtSbtCheck compile test
+
       - name: Tests
-        run: sbt clean coverage "Gatling / testOnly ru.tinkoff.gatling.amqp.examples.AmqpGatlingTest" coverageReport
+        run: sbt clean coverage "Gatling / testOnly ru.tinkoff.gatling.amqp.examples.AmqpGatlingTest" coverageReport coverageOff
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v3
