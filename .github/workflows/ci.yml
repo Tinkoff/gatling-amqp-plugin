@@ -35,7 +35,7 @@ jobs:
       - name: Test Release
         run: sbt clean scalafmtCheckAll scalafmtSbtCheck compile coverage "Gatling / testOnly ru.tinkoff.gatling.amqp.examples.AmqpGatlingTest" test coverageOff
 
-      - name: Tests
+      - name: Coverage Report
         run: sbt coverageReport
 
       - name: Upload coverage reports to Codecov
