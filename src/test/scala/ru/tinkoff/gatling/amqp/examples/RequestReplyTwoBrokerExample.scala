@@ -13,12 +13,11 @@ import scala.concurrent.duration._
 
 /** Execute this test.
   *   - start docker-compose for the `docker-compose.yaml` - docker-compose -f docker-compose.yml up
-  * -- open http://localhost:15672 (gatling publishes messages here), user: guest, password: guest
-  * -- open http://localhost:15673 (consumer writes messages here), user: guest, password: guest
+  * -- open http://localhost:15672 (gatling publishes messages here), user: guest, password: guest -- open
+  * http://localhost:15673 (consumer writes messages here), user: guest, password: guest
   *   - run RequestReplyGatlingRunner from IDE - it will
-  * -- start the messageConsumer SimpleRabbitMQClient
-  * -- gatling publish messages to readQueue, simpleClient reads them
-  * -- gatling receives messages from writeQueue, simple client has them written
+  * -- start the messageConsumer SimpleRabbitMQClient -- gatling publish messages to readQueue, simpleClient reads them --
+  * gatling receives messages from writeQueue, simple client has them written
   */
 class RequestReplyTwoBrokerExample extends Simulation {
 
